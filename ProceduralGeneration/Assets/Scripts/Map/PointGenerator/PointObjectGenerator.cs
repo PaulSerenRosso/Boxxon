@@ -8,8 +8,10 @@ namespace Map
 {
 public class PointObjectGenerator : MonoBehaviour
 {
+  
    [SerializeField]
    private Vector2 gridSize = new Vector3(10,10);
+   
    [SerializeField]
    private float minDistanceBetweenPoint = 1;
    [SerializeField]
@@ -26,7 +28,9 @@ public class PointObjectGenerator : MonoBehaviour
    [SerializeField]
    private float onePointObjectGenerationTime = 1;
 
-   private void Start()
+   
+   
+   public void LaunchPointObjectGenerator()
    {
       if (pointObjectPrefab == null || gridObjectPrefab == null)
          throw new Exception("Prefabs are not assigned");
