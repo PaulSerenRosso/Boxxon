@@ -286,13 +286,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1491fff99e25c1043bf6e2454ed8c7d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  superTriangleBaseEdgeOffset: 0
 --- !u!114 &752809550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,6 +298,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81f38d6382b8d18479937dc21913c783, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  superTriangleBaseEdgeOffset: 5
 --- !u!1 &997909263
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,14 +328,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c4e99ee0c1799849a3c12ed58de1587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointObjectGenerator: {fileID: 1432596980}
-  objectTriangulation: {fileID: 752809549}
+  organicGridPointGeneration: {fileID: 1432596981}
+  organicGridTriangulation: {fileID: 752809550}
+  baseGridObjectPrefab: {fileID: 7194740519792397768, guid: 0db06f1d125030f44a39f9bfd64b5693,
+    type: 3}
   organicGridRect:
     serializedVersion: 2
-    x: 0
-    y: 0
-    width: 0
-    height: 0
+    x: 3
+    y: 3
+    width: 5
+    height: 5
 --- !u!4 &997909265
 Transform:
   m_ObjectHideFlags: 0
@@ -520,16 +516,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2764ae9f6c839c741aae996a25147d91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: {x: 2.5, y: 2.5}
-  minDistanceBetweenPoint: 0.5
-  maxDistanceBetweenPoint: 1
-  pointObjectPrefab: {fileID: 7244053421150730146, guid: beda66ee06889684db1c57f080a848cf,
-    type: 3}
-  gridObjectPrefab: {fileID: 7194740519792397768, guid: 0db06f1d125030f44a39f9bfd64b5693,
-    type: 3}
-  parentSpawn: {fileID: 2011041221}
-  gridObjectSizeY: 0
-  onePointObjectGenerationTime: 0.2
 --- !u!114 &1432596981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,6 +528,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebc7272e83a31a64e85f3bee630839e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minDistanceBetweenPoint: 1
+  maxDistanceBetweenPoint: 2
+  pointObjectGenerator: {fileID: 1432596980}
+  _pointObjectPrefab: {fileID: 7244053421150730146, guid: beda66ee06889684db1c57f080a848cf,
+    type: 3}
 --- !u!1 &2011041220
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,7 +543,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2011041221}
   m_Layer: 0
-  m_Name: OrganicGridPoints
+  m_Name: OrganicGridParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

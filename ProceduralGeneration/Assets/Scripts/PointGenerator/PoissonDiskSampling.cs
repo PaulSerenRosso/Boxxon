@@ -4,9 +4,9 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Map
+namespace PointGenerator
 {
-    public class PointGenerator
+    public class PoissonDiskSampling 
     {
         public Vector2 GridSize
         {
@@ -32,7 +32,7 @@ namespace Map
         private List<Vector2> points;
         
 
-        public PointGenerator(Vector2 _gridSize, float _minDistanceBetweenPoints, float _maxDistanceBetweenPoints)
+        public PoissonDiskSampling(Vector2 _gridSize, float _minDistanceBetweenPoints, float _maxDistanceBetweenPoints)
         {
             gridSize = _gridSize;
             minDistanceBetweenPoints = _minDistanceBetweenPoints;
@@ -163,5 +163,9 @@ namespace Map
             return maxPoint;
         }
 
+        public Vector2[] GeneratePoints()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

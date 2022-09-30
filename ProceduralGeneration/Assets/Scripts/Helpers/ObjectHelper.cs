@@ -41,4 +41,34 @@ public static class ObjectHelper
         _transform.localScale = transformScale;
         _transform.parent = parent;
     }
+
+    public static Vector3 ConvertTo3dSpace(this Vector2 position2d, CoordinateType xConverter , CoordinateType yConverter, Vector3 offset)
+    {
+        Coordinate[] coordinatesToConvert = new[] { new Coordinate(xConverter,position2d.x), new Coordinate(yConverter, position2d.y)};
+        
+        Vector3 result = Vector3.zero;
+        for (int i = 0; i < coordinatesToConvert.Length; i++)
+        {
+            switch (coordinatesToConvert[i].type)
+            {
+                case CoordinateType.X :
+                {
+                    result.x = coordinatesToConvert[i].value;
+                 break;   
+                }
+                case CoordinateType.Y : 
+                {
+                    result.y = coordinatesToConvert[i].value;
+                    break; 
+                }
+                case CoordinateType.Z : 
+                {
+                    result.z = coordinatesToConvert[i].value;
+                    break; 
+                }
+            }
+        }
+        result += offset;
+        return result;
+    }
 }
