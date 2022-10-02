@@ -17,8 +17,8 @@ public class PointObjectGenerator : MonoBehaviour
     }
    public void LaunchPointObjectGenerator(GameObject _pointObjectPrefab, Vector3[] _pointObjectsPosition, float _onePointObjectGenerationTime = 1)
    {
-      if (pointObjectPrefab == null)
-         throw new Exception("Prefabs are not assigned");
+      if (_pointObjectPrefab == null)
+         throw new Exception("Prefab is not assigned");
       pointObjectPrefab = _pointObjectPrefab;
       onePointObjectGenerationTime = _onePointObjectGenerationTime;
       StartCoroutine(IterateGeneration(_pointObjectsPosition));
@@ -29,7 +29,7 @@ public class PointObjectGenerator : MonoBehaviour
      GameObject[] currentPointObjects = new GameObject[_pointObjectsPosition.Length];
       for (int i = 0; i <  _pointObjectsPosition.Length; i++)
       {
-        pointObjects[i] = Instantiate(pointObjectPrefab, _pointObjectsPosition[i], Quaternion.identity, transform);
+        currentPointObjects[i] = Instantiate(pointObjectPrefab, _pointObjectsPosition[i], Quaternion.identity, transform);
          yield return new WaitForSeconds(onePointObjectGenerationTime);
       }
       pointObjects = new GameObject[currentPointObjects.Length];

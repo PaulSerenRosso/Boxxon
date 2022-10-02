@@ -41,12 +41,12 @@ namespace PointGenerator
                 throw new Exception("Points Generator arguments is not valid");
         }
         
-        public List<Vector2> GeneratePoints(
+        public Vector2[] GeneratePoints(
             int iterationForFindNewPoint = 30)
         {
             Initialize();
             IterateGeneration(iterationForFindNewPoint);
-            return points;
+            return points.ToArray();
         }
 
         void Initialize()
@@ -124,12 +124,6 @@ namespace PointGenerator
                         }
                     }
                 }
-
-                for (int i = 0; i < neighbours.Count; i++)
-                {
-                Debug.Log(_point +"   "+pointCellIndex + "    "+ minNeighboursCellsIndex+"   "+maxNeighboursCellsIndex+ "   " + neighbours[i]);
-                
-                }
                 return true;
             }
             return false;
@@ -163,9 +157,6 @@ namespace PointGenerator
             return maxPoint;
         }
 
-        public Vector2[] GeneratePoints()
-        {
-            throw new NotImplementedException();
-        }
+    
     }
 }

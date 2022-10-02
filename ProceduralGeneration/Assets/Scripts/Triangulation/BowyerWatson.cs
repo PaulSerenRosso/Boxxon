@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Triangulation
@@ -18,8 +19,21 @@ public class BowyerWatson
     
     public Triangle[] Triangulate()
     {
-       MathHelper.GetTriangleWitchInscribesRect(rect, superTriangleBaseEdgeOffset);
-       return new Triangle[2];
+        Triangle superTriangle = MathHelper.GetTriangleWitchInscribesRect(rect, superTriangleBaseEdgeOffset);
+        Dictionary<Triangle, Circle> trianglesWithCircumCircle = new Dictionary<Triangle, Circle>();
+        trianglesWithCircumCircle.Add(superTriangle, superTriangle.GetTriangleCircumCircle());
+        for (int i = 0; i < points.Length; i++)
+        {
+            foreach (var triangleWithCircumCircle in trianglesWithCircumCircle)
+            {
+                if ((points[i] - triangleWithCircumCircle.Value.center).sqrMagnitude <=
+                    triangleWithCircumCircle.Value.radius * triangleWithCircumCircle.Value.radius)
+                {
+                    
+                }
+            }
+        }
+        return new Triangle[1];
     }
 }
 }

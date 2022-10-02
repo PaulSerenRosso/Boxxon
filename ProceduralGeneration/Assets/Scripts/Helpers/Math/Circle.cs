@@ -1,14 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public struct Circle 
 {
-    public float3 center;
-    public float3 radius;
+    public Vector2 center;
+    public float radius;
 
-    public Circle(float3 _center, float3 _radius)
+    public Circle(Vector2 _center, float _radius)
     {
         center = _center;
         radius = _radius;

@@ -1,17 +1,17 @@
 using System;
-using Unity.Mathematics;
+using UnityEngine;
 
 [Serializable]
 public struct Triangle
 {
-   public float3 vert0;
-   public float3 vert1;
-   public float3 vert2;
+   public Vector2 vertexA;
+   public Vector2 vertexB;
+   public Vector2 vertexC;
    
-   public Triangle(float3 _vert0, float3 _vert1, float3 _vert2)
+   public Triangle(Vector2 _vertexA, Vector2 _vertexB, Vector2 _vertexC)
    {
-      vert0 = _vert0;
-      vert1 = _vert1;
-      vert2 = _vert2;
+      vertexA = _vertexA;
+      vertexB = _vertexB;
+      vertexC = _vertexC;
    }
 }
