@@ -51,10 +51,10 @@ static public class MathHelper
        float doubleSinAngleABC = Mathf.Sin(angleABC)*2; 
        float doubleSinAngleBCA = Mathf.Sin(angleBCA)*2; 
        float circumCircleRadius = angleBAC/doubleSinAngleBAC;
-       float circumCircleCenterX = (_triangle.vertexA.x * doubleSinAngleBAC + _triangle.vertexB.x * doubleSinAngleABC +
-                                   _triangle.vertexC.x * doubleSinAngleBCA)/(doubleSinAngleABC+doubleSinAngleBAC+doubleSinAngleBCA);
-       float circumCircleCenterY = (_triangle.vertexA.y * doubleSinAngleBAC + _triangle.vertexB.y * doubleSinAngleABC +
-                                    _triangle.vertexC.y * doubleSinAngleBCA)/(doubleSinAngleABC+doubleSinAngleBAC+doubleSinAngleBCA);
+       float circumCircleCenterX = (_triangle.vertices[0].x * doubleSinAngleBAC + _triangle.vertices[1].x * doubleSinAngleABC +
+                                    _triangle.vertices[2].x * doubleSinAngleBCA)/(doubleSinAngleABC+doubleSinAngleBAC+doubleSinAngleBCA);
+       float circumCircleCenterY = (_triangle.vertices[0].y * doubleSinAngleBAC + _triangle.vertices[1].y * doubleSinAngleABC +
+                                    _triangle.vertices[2].y * doubleSinAngleBCA)/(doubleSinAngleABC+doubleSinAngleBAC+doubleSinAngleBCA);
        Vector2 circumCircleCenter = new Vector2(circumCircleCenterX, circumCircleCenterY); 
        return new Circle(circumCircleCenter, circumCircleRadius);
    }
@@ -66,17 +66,17 @@ static public class MathHelper
        {
            case 0:
            {
-               angle = Mathf.Acos(Vector2.Dot((_triangle.vertexA - _triangle.vertexB).normalized, (_triangle.vertexA - _triangle.vertexC).normalized));
+               angle = Mathf.Acos(Vector2.Dot((_triangle.vertices[0] - _triangle.vertices[1]).normalized, (_triangle.vertices[0] - _triangle.vertices[2]).normalized));
                break;
            }
            case 1:
            {
-               angle = Mathf.Acos(Vector2.Dot((_triangle.vertexB - _triangle.vertexA).normalized, (_triangle.vertexB - _triangle.vertexC).normalized));
+               angle = Mathf.Acos(Vector2.Dot((_triangle.vertices[1] - _triangle.vertices[0]).normalized, (_triangle.vertices[1] - _triangle.vertices[2]).normalized));
                break;
            }
            case 2:
            {
-               angle = Mathf.Acos(Vector2.Dot((_triangle.vertexC - _triangle.vertexA).normalized, (_triangle.vertexC - _triangle.vertexB).normalized));
+               angle = Mathf.Acos(Vector2.Dot((_triangle.vertices[2] - _triangle.vertices[0]).normalized, (_triangle.vertices[2] -_triangle.vertices[1]).normalized));
                break;
            }
            default:
@@ -98,6 +98,45 @@ static public class MathHelper
        Vector2 directionAC = new Vector2(cosBAD, Mathf.Sin(Mathf.Acos(cosBAD)));
        Vector2 vertexC = vertexA + directionAC * distanceAC;
        return new Triangle(vertexA, vertexB, vertexC);
+   }
+
+   public static Segment[] GetSegmentsInTriangles(this Triangle _triangle)
+   {
+       return new Segment[3]{new (_triangle.vertices[0], _triangle.vertices[1]), new (_triangle.vertices[0], _triangle.vertices[2]), new (_triangle.vertices[1], _triangle.vertices[2])};
+   }
+
+   public static bool TriangleHasEdge(this Triangle _triangle, Segment _segment)
+   {
+    
+       
+       for (int i = 0; i < _triangle.vertices.Length; i++)
+       {
+           int sharedVerticesCount = 0;
+           if (_triangle.vertices[i] == _segment.PointA || _triangle.vertices[i] == _segment.PointB)
+           {
+               sharedVerticesCount++;
+               if (sharedVerticesCount == 2)
+               {
+                   return true; 
+               }
+           }
+       }
+       return false; 
+   }
+
+   public static bool TriangleHasSharedVertices(this Triangle triangleA, Triangle triangleB)
+   {
+       for (int i = 0; i < triangleA.vertices.Length; i++)
+       {
+           for (int j = 0; j < triangleB.vertices.Length; j++)
+           {
+               if (triangleA.vertices[i] == triangleB.vertices[j])
+               {
+                   return true; 
+               }
+           }
+       }
+       return false; 
    }
    
 
