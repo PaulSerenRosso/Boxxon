@@ -1,12 +1,16 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public struct Triangle
+namespace GeometryHelpers
 {
-   public Vector2[] vertices;
-   public Triangle(Vector2 _vertexA, Vector2 _vertexB, Vector2 _vertexC)
+   [Serializable]
+   public struct Triangle
    {
-      vertices = new Vector2[] { _vertexA, _vertexB, _vertexC };
+      public Vector2[] Vertices;
+
+      public Triangle(Vector2 _vertexA, Vector2 _vertexB, Vector2 _vertexC)
+      {
+         Vertices = new Vector2[] { _vertexA, _vertexB, _vertexC };
+      }
    }
 }

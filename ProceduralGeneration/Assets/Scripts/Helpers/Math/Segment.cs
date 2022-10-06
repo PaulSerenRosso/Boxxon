@@ -3,15 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class Segment
+namespace GeometryHelpers
 {
-
-    public Segment(Vector2 _pointA, Vector2 _pointB)
+    [Serializable]
+    public class Segment
     {
-        PointA = _pointA;
-        PointB = _pointB;
+        public Segment(Vector2 _pointA, Vector2 _pointB)
+        {
+            Points = new[] { _pointA, _pointB };
+        }
+
+        public Vector2[] Points;
+        
     }
-    public Vector2 PointA;
-    public Vector2 PointB;
 }
