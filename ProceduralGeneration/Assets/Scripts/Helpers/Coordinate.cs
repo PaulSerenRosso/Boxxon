@@ -11,9 +11,9 @@ public class Coordinate
 {
     public Coordinate(CoordinateType _type, float _value)
     {
-        type = _type;
-        value = _value;
+        Type = _type;
+        Value = _value;
     }
-    public CoordinateType type;
-    public float value;
+    public CoordinateType Type;
+    public float Value;
 }

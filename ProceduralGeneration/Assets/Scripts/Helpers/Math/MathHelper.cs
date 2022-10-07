@@ -15,6 +15,20 @@ static public class MathHelper
         }
         return false;
     }
+    
+    public static bool isClamp(this Vector3 _inputVec, Vector3 _minVec, Vector3 _maxVec)
+    {
+        return (IsClamp(_inputVec.x, _maxVec.x, _minVec.x) && IsClamp(_inputVec.y, _maxVec.y, _minVec.y) 
+                                                        && IsClamp(_inputVec.z, _maxVec.z, _minVec.z));
+    }
+    
+    public static Vector3 Clamp(this Vector3 _inputVec, Vector3 _minVec, Vector3 _maxVec)
+    {
+        _inputVec.x = Mathf.Clamp(_inputVec.x, _maxVec.x, _minVec.x);
+        _inputVec.y = Mathf.Clamp(_inputVec.y, _maxVec.y, _minVec.y);
+        _inputVec.z = Mathf.Clamp(_inputVec.z, _maxVec.z, _minVec.z);
+        return _inputVec;
+    }
 
     public static bool IsClamp(this int _value, int _min, int _max)
     {
