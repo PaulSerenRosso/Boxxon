@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace GeometryHelpers
 {
     public static class GeometryHelper
@@ -56,6 +57,7 @@ namespace GeometryHelpers
                     break;
                 }
             }
+
             return angle;
         }
 
@@ -84,21 +86,23 @@ namespace GeometryHelpers
         {
             for (int j = 0; j < _segment.Points.Length; j++)
             {
-            for (int i = 0; i < _triangle.Vertices.Length; i++)
-            {
-                int sharedVerticesCount = 0;
-                if (_triangle.Vertices[i] == _segment.Points[j])
+                for (int i = 0; i < _triangle.Vertices.Length; i++)
                 {
-                    sharedVerticesCount++;
-                    if (sharedVerticesCount == 2)
+                    int sharedVerticesCount = 0;
+                    if (_triangle.Vertices[i] == _segment.Points[j])
                     {
-                        return true;
+                        sharedVerticesCount++;
+                        if (sharedVerticesCount == 2)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
-            }
+
             return false;
         }
+
         public static bool TrianglesHaveOneSharedVertex(this Triangle _triangleA, Triangle _triangleB)
         {
             for (int i = 0; i < _triangleA.Vertices.Length; i++)
@@ -111,9 +115,10 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             return false;
         }
-        
+
         public static Vector2 GetCommunVertexOfTriangles(this Triangle _triangleA, Triangle _triangleB)
         {
             for (int i = 0; i < _triangleA.Vertices.Length; i++)
@@ -126,6 +131,7 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             throw new Exception("Triangles don't have one same vertex");
         }
 
@@ -140,13 +146,14 @@ namespace GeometryHelpers
                 {
                     for (int k = 0; k < triangles[j].Vertices.Length; k++)
                     {
-                    if (triangles[j].Vertices[k] != _communEdge.Points[i])
-                    {
-                        unsharedPoints.Add(triangles[j].Vertices[k]);
-                    }
+                        if (triangles[j].Vertices[k] != _communEdge.Points[i])
+                        {
+                            unsharedPoints.Add(triangles[j].Vertices[k]);
+                        }
                     }
                 }
             }
+
             if (unsharedPoints.Count != 2)
                 throw new Exception("Triangles have not one same edge or the current segment is not the good one");
             return new Quad(_communEdge.Points[0], _communEdge.Points[1], unsharedPoints[0], unsharedPoints[1]);
@@ -165,9 +172,10 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             return verticesCount == 2;
         }
-        
+
         public static Segment GetSameEdgeOfTriangles(this Triangle _triangleA, Triangle _triangleB)
         {
             List<Vector2> sameVertices = new List<Vector2>();
@@ -181,23 +189,49 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             if (sameVertices.Count == 2)
             {
-                return new Segment(sameVertices[0], sameVertices[1]); 
+                return new Segment(sameVertices[0], sameVertices[1]);
             }
+
             throw new Exception("Triangles don't have one same edge");
         }
-        /*
-    public static Quad[] SubdivideQuadInQuads(this Quad _quadA)
-    {
+
+        public static Vector2 GetPolygonCenter(Vector2[] _vertices)
+        {
+            Vector2 center = Vector2.zero;
+            for (int i = 0; i < _vertices.Length; i++)
+            {
+                center += _vertices[i];
+            }
+            center /= _vertices.Length;
+            return center;
+        }
+
+        public static List<Vector2> GetMidEdgePoints(this Vector2[] _vertices)
+        {
+            List<Vector2> midEdgePoints = new List<Vector2>();
+            midEdgePoints.Add((_vertices[0] + _vertices[3]) / 2);
+            for (int i = 0; i < _vertices.Length - 1; i++)
+            {
+                midEdgePoints.Add((_vertices[i] + _vertices[i + 1]) / 2);
+            }
+            return midEdgePoints;
+        }
+        public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices)
+        {
+            Vector2 center = GetPolygonCenter(_vertices);
+            List<Vector2> midEdgePoints = GetMidEdgePoints(_vertices);
+            Quad[] quads = new Quad[4];
+            for (int i = 1; i < midEdgePoints.Count; i++)
+            {
+                quads[i] = new Quad(center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
+            }
+
+            quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
+            return quads;
+        }
         
     }
-    
-    public static Quad[] SubdivideTriangleInQuads(this Triangle _triangleA)
-    {
-        
-    }
-    */
 }
-    }
-    

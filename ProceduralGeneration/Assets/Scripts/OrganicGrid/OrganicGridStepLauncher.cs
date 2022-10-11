@@ -1,3 +1,4 @@
+using GeometryHelpers;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -15,6 +16,8 @@ public class OrganicGridStepLauncher : MonoBehaviour
     
     private void Start()
     {
+     
+        
         organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
             startGridTransform == null ? Vector3.zero : startGridTransform.position);
         CreateBaseGridObjectPrefab();

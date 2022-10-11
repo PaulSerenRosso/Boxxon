@@ -25,7 +25,6 @@ namespace MonoLoopFunctions
             {
                 UpdateElement(e);
             }
-
             e.Dispose();
         }
 
