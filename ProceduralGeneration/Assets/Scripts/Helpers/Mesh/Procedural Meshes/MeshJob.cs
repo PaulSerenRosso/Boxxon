@@ -1,11 +1,10 @@
 using System;
-using ProceduralMeshes.Streams;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace ProceduralMeshes {
+ namespace MeshGenerator {
 
 	[BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
 	public struct MeshJob<G> : IJobFor
@@ -16,6 +15,8 @@ namespace ProceduralMeshes {
 		[WriteOnly]
 		MeshJobTrianglesAndVertices trianglesAndVertices;
 
+		// mettre le constructeur du generator dans le helper
+		
 		public void Execute (int i) => generator.Execute(i, trianglesAndVertices);
 
 		public static JobHandle ScheduleParallel (

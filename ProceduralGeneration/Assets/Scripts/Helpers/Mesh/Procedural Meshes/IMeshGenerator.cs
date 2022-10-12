@@ -1,7 +1,6 @@
-using ProceduralMeshes.Streams;
 using UnityEngine;
 
-namespace ProceduralMeshes {
+namespace MeshGenerator {
 
 	public interface IMeshGenerator {
 

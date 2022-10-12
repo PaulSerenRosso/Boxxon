@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace ProceduralMeshes.Streams {
+namespace MeshGenerator {
 
 	[StructLayout(LayoutKind.Sequential)]
 	public struct TriangleUInt16 {

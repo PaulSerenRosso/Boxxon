@@ -1,11 +1,12 @@
-using ProceduralMeshes;
-using ProceduralMeshes.Streams;
 using Unity.Mathematics;
 using UnityEngine;
 
 using static Unity.Mathematics.math;
 
-	public struct SquareGrid : IMeshGenerator {
+namespace MeshGenerator
+{
+	public struct SquareGrid : IMeshGenerator
+	{
 
 		public Bounds Bounds => new Bounds(Vector3.zero, new Vector3(1f, 0f, 1f));
 
@@ -17,10 +18,12 @@ using static Unity.Mathematics.math;
 
 		public int Resolution { get; set; }
 
-		public void Execute (int z, MeshJobTrianglesAndVertices _trianglesAndVertices) {
+		public void Execute(int z, MeshJobTrianglesAndVertices _trianglesAndVertices)
+		{
 			int vi = 4 * Resolution * z, ti = 2 * Resolution * z;
 
-			for (int x = 0; x < Resolution; x++, vi += 4, ti += 2) {
+			for (int x = 0; x < Resolution; x++, vi += 4, ti += 2)
+			{
 				var xCoordinates = float2(x, x + 1f) / Resolution - 0.5f;
 				var zCoordinates = float2(z, z + 1f) / Resolution - 0.5f;
 
@@ -50,3 +53,4 @@ using static Unity.Mathematics.math;
 			}
 		}
 	}
+}

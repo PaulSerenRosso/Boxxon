@@ -1,11 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
-using ProceduralMeshes.Streams;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace ProceduralMeshes
+namespace MeshGenerator
 {
     public struct MeshJobTrianglesAndVertices
     {
