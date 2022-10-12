@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a9792e21f394c2eb0e8e4d73f087255, type: 3}
+  m_Name: SceneDebugViews
+  m_EditorClassIdentifier: 
+  DebugDrawModes:
+  - name: Object Normals (Vertex)
+    category: Debug
+    shader: {fileID: 4800000, guid: 7639b7f1e3e8461aa6db2a1fe6f7e188, type: 3}
+  - name: Object Normals (Vertex) (Absolute)
+    category: Debug
+    shader: {fileID: 4800000, guid: 9cfac6f62114bfe4fa8af1584d0c663c, type: 3}
+  - name: World Normals (Vertex)
+    category: Debug
+    shader: {fileID: 4800000, guid: 52c427a9a60c475eabfc636cc9c0c068, type: 3}
+  - name: World Normals (Per-Pixel)
+    category: Debug
+    shader: {fileID: 4800000, guid: f9b4319200a24a4d80078d15e0895c67, type: 3}
+  - name: World Normals (Per-Pixel) (Absolute)
+    category: Debug
+    shader: {fileID: 4800000, guid: a04926edf8564997b7816eed9ce357ed, type: 3}
+  - name: Object UV (Vertex)
+    category: Debug
+    shader: {fileID: 4800000, guid: a305f3a3ebe0f6a4bb0a5860f25da162, type: 3}
+  - name: Object UV (World)
+    category: Debug
+    shader: {fileID: 4800000, guid: c7ff2e40d7b04ad48a53f910c38bc212, type: 3}
+  - name: Albedo Map
+    category: Debug
+    shader: {fileID: 4800000, guid: 687a165d82eb4f5ab6f3dc53339a6b39, type: 3}
+  - name: Smoothness Map
+    category: Debug
+    shader: {fileID: 4800000, guid: 70cd88dc3479414bb14917a4513dc64b, type: 3}
+  - name: Occlusion
+    category: Debug
+    shader: {fileID: 4800000, guid: 38d22bc041084fdbaf6a7910abca48fb, type: 3}
+  - name: Reconstruct WorldPos
+    category: Debug
+    shader: {fileID: 4800000, guid: 5458431621dd97d43b3efd864b8b31ea, type: 3}

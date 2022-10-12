@@ -21,15 +21,15 @@ public class ProceduralMesh : MonoBehaviour {
 	void OnValidate () => enabled = true;
 
 	void Update () {
-		GenerateMesh();
+		GenerateMesh<SquareGrid>();
 		enabled = false;
 	}
 
-	void GenerateMesh () {
+	void GenerateMesh<T> () where T : struct, IMeshGenerator {
 		Mesh.MeshDataArray _meshDataArray = Mesh.AllocateWritableMeshData(1);
 		Mesh.MeshData meshData = _meshDataArray[0];
 
-		MeshJob<SquareGrid>.ScheduleParallel(
+		MeshJob<T>.ScheduleParallel(
 			mesh, meshData, resolution, default
 		).Complete();
 		Mesh.ApplyAndDisposeWritableMeshData(_meshDataArray, mesh);
