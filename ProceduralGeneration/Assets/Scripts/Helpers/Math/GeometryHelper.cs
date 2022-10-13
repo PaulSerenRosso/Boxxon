@@ -7,48 +7,48 @@ namespace GeometryHelpers
 {
     public static class GeometryHelper
     {
-        public static Circle GetTriangleCircumCircle(this Triangle _triangle)
+        public static Circle GetTriangleCircumCircle(this Triangle2DPosition triangle2DPosition)
         {
-            float angleBAC = _triangle.GetTriangleVerticeAngle(0);
-            float angleABC = _triangle.GetTriangleVerticeAngle(1);
+            float angleBAC = triangle2DPosition.GetTriangleVerticeAngle(0);
+            float angleABC = triangle2DPosition.GetTriangleVerticeAngle(1);
             float angleBCA = Mathf.PI - (angleABC + angleBAC);
             float doubleSinAngleBAC = Mathf.Sin(angleBAC) * 2;
             float doubleSinAngleABC = Mathf.Sin(angleABC) * 2;
             float doubleSinAngleBCA = Mathf.Sin(angleBCA) * 2;
             float circumCircleRadius = angleBAC / doubleSinAngleBAC;
-            float circumCircleCenterX = (_triangle.Vertices[0].x * doubleSinAngleBAC +
-                                         _triangle.Vertices[1].x * doubleSinAngleABC +
-                                         _triangle.Vertices[2].x * doubleSinAngleBCA) /
+            float circumCircleCenterX = (triangle2DPosition.Vertices[0].x * doubleSinAngleBAC +
+                                         triangle2DPosition.Vertices[1].x * doubleSinAngleABC +
+                                         triangle2DPosition.Vertices[2].x * doubleSinAngleBCA) /
                                         (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
-            float circumCircleCenterY = (_triangle.Vertices[0].y * doubleSinAngleBAC +
-                                         _triangle.Vertices[1].y * doubleSinAngleABC +
-                                         _triangle.Vertices[2].y * doubleSinAngleBCA) /
+            float circumCircleCenterY = (triangle2DPosition.Vertices[0].y * doubleSinAngleBAC +
+                                         triangle2DPosition.Vertices[1].y * doubleSinAngleABC +
+                                         triangle2DPosition.Vertices[2].y * doubleSinAngleBCA) /
                                         (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
             Vector2 circumCircleCenter = new Vector2(circumCircleCenterX, circumCircleCenterY);
             return new Circle(circumCircleCenter, circumCircleRadius);
         }
 
-        public static float GetTriangleVerticeAngle(this Triangle _triangle, int vertex)
+        public static float GetTriangleVerticeAngle(this Triangle2DPosition triangle2DPosition, int vertex)
         {
             float angle = 0;
             switch (vertex)
             {
                 case 0:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((_triangle.Vertices[0] - _triangle.Vertices[1]).normalized,
-                        (_triangle.Vertices[0] - _triangle.Vertices[2]).normalized));
+                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[0] - triangle2DPosition.Vertices[1]).normalized,
+                        (triangle2DPosition.Vertices[0] - triangle2DPosition.Vertices[2]).normalized));
                     break;
                 }
                 case 1:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((_triangle.Vertices[1] - _triangle.Vertices[0]).normalized,
-                        (_triangle.Vertices[1] - _triangle.Vertices[2]).normalized));
+                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[0]).normalized,
+                        (triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[2]).normalized));
                     break;
                 }
                 case 2:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((_triangle.Vertices[2] - _triangle.Vertices[0]).normalized,
-                        (_triangle.Vertices[2] - _triangle.Vertices[1]).normalized));
+                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[0]).normalized,
+                        (triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[1]).normalized));
                     break;
                 }
                 default:
@@ -61,7 +61,7 @@ namespace GeometryHelpers
             return angle;
         }
 
-        public static Triangle GetTriangleWitchInscribesRect(Rect _rect, float _sizeOfTriangleBaseOffset)
+        public static Triangle2DPosition GetTriangleWitchInscribesRect(Rect _rect, float _sizeOfTriangleBaseOffset)
         {
             Vector2 vertexA = new Vector2(_rect.xMin - _sizeOfTriangleBaseOffset, _rect.yMin);
             Vector2 vertexB = new Vector2(_rect.xMax + _sizeOfTriangleBaseOffset, _rect.yMin);
@@ -70,26 +70,26 @@ namespace GeometryHelpers
             float distanceAC = (_sizeOfTriangleBaseOffset + _rect.width / 2) / cosBAD;
             Vector2 directionAC = new Vector2(cosBAD, Mathf.Sin(Mathf.Acos(cosBAD)));
             Vector2 vertexC = vertexA + directionAC * distanceAC;
-            return new Triangle(vertexA, vertexB, vertexC);
+            return new Triangle2DPosition(vertexA, vertexB, vertexC);
         }
 
-        public static Segment[] GetSegmentsInTriangles(this Triangle _triangle)
+        public static Segment[] GetSegmentsInTriangles(this Triangle2DPosition triangle2DPosition)
         {
             return new Segment[3]
             {
-                new(_triangle.Vertices[0], _triangle.Vertices[1]), new(_triangle.Vertices[0], _triangle.Vertices[2]),
-                new(_triangle.Vertices[1], _triangle.Vertices[2])
+                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]), new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[2]),
+                new(triangle2DPosition.Vertices[1], triangle2DPosition.Vertices[2])
             };
         }
 
-        public static bool TriangleHasEdge(this Triangle _triangle, Segment _segment)
+        public static bool TriangleHasEdge(this Triangle2DPosition triangle2DPosition, Segment _segment)
         {
             for (int j = 0; j < _segment.Points.Length; j++)
             {
-                for (int i = 0; i < _triangle.Vertices.Length; i++)
+                for (int i = 0; i < triangle2DPosition.Vertices.Length; i++)
                 {
                     int sharedVerticesCount = 0;
-                    if (_triangle.Vertices[i] == _segment.Points[j])
+                    if (triangle2DPosition.Vertices[i] == _segment.Points[j])
                     {
                         sharedVerticesCount++;
                         if (sharedVerticesCount == 2)
@@ -103,13 +103,13 @@ namespace GeometryHelpers
             return false;
         }
 
-        public static bool TrianglesHaveOneSharedVertex(this Triangle _triangleA, Triangle _triangleB)
+        public static bool TrianglesHaveOneSharedVertex(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
         {
-            for (int i = 0; i < _triangleA.Vertices.Length; i++)
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
-                for (int j = 0; j < _triangleB.Vertices.Length; j++)
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
                 {
-                    if (_triangleA.Vertices[i] == _triangleB.Vertices[j])
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
                     {
                         return true;
                     }
@@ -119,15 +119,15 @@ namespace GeometryHelpers
             return false;
         }
 
-        public static Vector2 GetCommunVertexOfTriangles(this Triangle _triangleA, Triangle _triangleB)
+        public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
         {
-            for (int i = 0; i < _triangleA.Vertices.Length; i++)
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
-                for (int j = 0; j < _triangleB.Vertices.Length; j++)
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
                 {
-                    if (_triangleA.Vertices[i] == _triangleB.Vertices[j])
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
                     {
-                        return _triangleA.Vertices[i];
+                        return triangle2DPositionA.Vertices[i];
                     }
                 }
             }
@@ -135,9 +135,9 @@ namespace GeometryHelpers
             throw new Exception("Triangles don't have one same vertex");
         }
 
-        public static Quad CreateQuadWithTwoTriangle(this Triangle _triangleA, Triangle _triangleB, Segment _communEdge)
+        public static Quad CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB, Segment _communEdge)
         {
-            Triangle[] triangles = new[] { _triangleA, _triangleB };
+            Triangle2DPosition[] triangles = new[] { triangle2DPositionA, triangle2DPositionB };
             //check pour 
             List<Vector2> unsharedPoints = new List<Vector2>();
             for (int i = 0; i < _communEdge.Points.Length; i++)
@@ -159,14 +159,14 @@ namespace GeometryHelpers
             return new Quad(_communEdge.Points[0], _communEdge.Points[1], unsharedPoints[0], unsharedPoints[1]);
         }
 
-        public static bool TrianglesHaveOneSameEdge(this Triangle _triangleA, Triangle _triangleB)
+        public static bool TrianglesHaveOneSameEdge(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
         {
             int verticesCount = 0;
-            for (int i = 0; i < _triangleA.Vertices.Length; i++)
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
-                for (int j = 0; j < _triangleB.Vertices.Length; j++)
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
                 {
-                    if (_triangleA.Vertices[i] == _triangleB.Vertices[j])
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
                     {
                         verticesCount++;
                     }
@@ -176,16 +176,16 @@ namespace GeometryHelpers
             return verticesCount == 2;
         }
 
-        public static Segment GetSameEdgeOfTriangles(this Triangle _triangleA, Triangle _triangleB)
+        public static Segment GetSameEdgeOfTriangles(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
         {
             List<Vector2> sameVertices = new List<Vector2>();
-            for (int i = 0; i < _triangleA.Vertices.Length; i++)
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
-                for (int j = 0; j < _triangleB.Vertices.Length; j++)
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
                 {
-                    if (_triangleA.Vertices[i] == _triangleB.Vertices[j])
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
                     {
-                        sameVertices.Add(_triangleA.Vertices[i]);
+                        sameVertices.Add(triangle2DPositionA.Vertices[i]);
                     }
                 }
             }

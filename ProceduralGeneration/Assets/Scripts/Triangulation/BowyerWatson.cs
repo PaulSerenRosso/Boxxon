@@ -10,9 +10,9 @@ namespace Triangulation
 
         private float superTriangleBaseEdgeOffset;
 
-        Triangle superTriangle;
-        Dictionary<Triangle, Circle> trianglesWithCircumCircle = new Dictionary<Triangle, Circle>();
-        Dictionary<Triangle, Segment[]> trianglesWithEdges = new Dictionary<Triangle, Segment[]>();
+        Triangle2DPosition superTriangle2DPosition;
+        Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle = new Dictionary<Triangle2DPosition, Circle>();
+        Dictionary<Triangle2DPosition, Segment[]> trianglesWithEdges = new Dictionary<Triangle2DPosition, Segment[]>();
         private Vector2[] points;
 
         public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points)
@@ -20,15 +20,15 @@ namespace Triangulation
             rect = _rect;
             superTriangleBaseEdgeOffset = _superTriangleBaseEdgeOffset;
             points = _points;
-            superTriangle = GeometryHelper.GetTriangleWitchInscribesRect(rect, superTriangleBaseEdgeOffset);
+            superTriangle2DPosition = GeometryHelper.GetTriangleWitchInscribesRect(rect, superTriangleBaseEdgeOffset);
         }
 
-        public Triangle[] Triangulate()
+        public Triangle2DPosition[] Triangulate()
         {
-            trianglesWithCircumCircle.Add(superTriangle, superTriangle.GetTriangleCircumCircle());
+            trianglesWithCircumCircle.Add(superTriangle2DPosition, superTriangle2DPosition.GetTriangleCircumCircle());
             for (int i = 0; i < points.Length; i++)
             {
-                List<Triangle> trianglesChoosen = new List<Triangle>();
+                List<Triangle2DPosition> trianglesChoosen = new List<Triangle2DPosition>();
                 foreach (var triangleWithCircumCircle in trianglesWithCircumCircle)
                 {
                     if ((points[i] - triangleWithCircumCircle.Value.center).sqrMagnitude <=
@@ -69,15 +69,15 @@ namespace Triangulation
 
                 for (int j = 0; j < polygone.Count; j++)
                 {
-                    Triangle newTriangle = new Triangle(points[i], polygone[j].Points[0], polygone[j].Points[1]);
-                    trianglesWithCircumCircle.Add(newTriangle, newTriangle.GetTriangleCircumCircle());
+                    Triangle2DPosition newTriangle2DPosition = new Triangle2DPosition(points[i], polygone[j].Points[0], polygone[j].Points[1]);
+                    trianglesWithCircumCircle.Add(newTriangle2DPosition, newTriangle2DPosition.GetTriangleCircumCircle());
                 }
             }
 
-            List<Triangle> triangles = new List<Triangle>();
+            List<Triangle2DPosition> triangles = new List<Triangle2DPosition>();
             foreach (var triangle in trianglesWithCircumCircle)
             {
-                if (!superTriangle.TrianglesHaveOneSharedVertex(triangle.Key))
+                if (!superTriangle2DPosition.TrianglesHaveOneSharedVertex(triangle.Key))
                 {
                     triangles.Add(triangle.Key);
                 }
@@ -87,14 +87,14 @@ namespace Triangulation
             return triangles.ToArray();
         }
 
-        Segment[] GetTriangleEdges(Triangle triangle)
+        Segment[] GetTriangleEdges(Triangle2DPosition triangle2DPosition)
         {
-            if (!trianglesWithEdges.ContainsKey(triangle))
+            if (!trianglesWithEdges.ContainsKey(triangle2DPosition))
             {
-                trianglesWithEdges.Add(triangle, triangle.GetSegmentsInTriangles());
+                trianglesWithEdges.Add(triangle2DPosition, triangle2DPosition.GetSegmentsInTriangles());
             }
 
-            return trianglesWithEdges[triangle];
+            return trianglesWithEdges[triangle2DPosition];
         }
     }
 }

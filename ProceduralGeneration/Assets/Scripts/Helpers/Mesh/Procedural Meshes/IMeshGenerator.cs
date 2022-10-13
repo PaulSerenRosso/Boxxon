@@ -12,8 +12,8 @@ namespace MeshGenerator {
 
 		int JobLength { get; }
 
-		int Resolution { get; set; }
-
+		
+		
 		void Execute (int i, MeshJobTrianglesAndVertices _trianglesAndVertices);
 		
 
