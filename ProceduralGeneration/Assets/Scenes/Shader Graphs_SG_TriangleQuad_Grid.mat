@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6634329081195086804
+--- !u!114 &-3390940873496539115
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,12 +20,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Shader Graphs_SG_GridForm
-  m_Shader: {fileID: -6465566751694194690, guid: e5e28d8277da54d459d899068c790ff2,
+  m_Name: Shader Graphs_SG_TriangleQuad_Grid
+  m_Shader: {fileID: -6465566751694194690, guid: f54f4fdb3fc4b66428b5747d9c8f7ee1,
     type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -48,7 +48,21 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Float: 0.125
+    - _Float_1: 0.05
+    - _GlobalScale: 2
     - _QueueControl: 0
     - _QueueOffset: 0
-    m_Colors: []
+    - _SharpEdge: 0.00001
+    - _Thickness: 1.27
+    m_Colors:
+    - _GlobalOffset: {r: 1, g: 0, b: 0, a: 0}
+    - _Point1: {r: 1, g: 1, b: 0, a: 0}
+    - _Point2: {r: 2, g: 1, b: 0, a: 0}
+    - _Point3: {r: 1, g: 2, b: 0, a: 0}
+    - _SquarePosition: {r: 0.75, g: 0.25, b: 0, a: 0}
+    - _SquareSize_1: {r: 0.25, g: 0.25, b: 0, a: 0}
+    - _SquareSize_2: {r: 0.22, g: 0.22, b: 0, a: 0}
+    - _Vector2: {r: 0, g: 0, b: 0, a: 0}
+    - _Vector2_1: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
