@@ -12,12 +12,12 @@ namespace MeshGenerator
         NativeArray<Vertex> vertices;
 
         [NativeDisableContainerSafetyRestriction]
-        NativeArray<TriangleUInt16> triangles;
+        NativeArray<TriangleID> triangles;
 
         public void Setup(Mesh.MeshData _meshData)
         {
             vertices = _meshData.GetVertexData<Vertex>();
-            triangles = _meshData.GetIndexData<ushort>().Reinterpret<TriangleUInt16>(2);
+            triangles = _meshData.GetIndexData<ushort>().Reinterpret<TriangleID>(2);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetVertex (int _index, Vertex _vertex) => vertices[_index] = new Vertex() {

@@ -89,7 +89,7 @@ namespace PointGenerator
         }
         Vector2 CreateRandomPoint(Vector2 _randomSpawnPoint)
         {
-            Vector2 randomPoint = _randomSpawnPoint + MathHelper.RandomDirection()
+            Vector2 randomPoint = _randomSpawnPoint + AlgebraHelper.RandomDirection()
                 * Random.Range(minDistanceBetweenPoints, maxDistanceBetweenPoints);
             return randomPoint;
         }

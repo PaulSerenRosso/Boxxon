@@ -1,11 +1,12 @@
 {
-    "name": "Triangulation",
+    "name": "Hierarchy2.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:8391ce04046b738448d1fe3392dc33b0"
+        "Hierarchy2.Runtime"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

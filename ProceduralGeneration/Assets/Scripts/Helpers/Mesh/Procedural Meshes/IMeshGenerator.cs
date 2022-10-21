@@ -1,21 +1,18 @@
 using UnityEngine;
 
 namespace MeshGenerator {
-
-	public interface IMeshGenerator {
-
-		Bounds Bounds { get; }
-
-		int VertexCount { get; }
-
-		int IndexCount { get; }
-
-		int JobLength { get; }
-
-		
-		
-		void Execute (int i, MeshJobTrianglesAndVertices _trianglesAndVertices);
-		
-
+	public interface IMeshGenerator
+	{
+		public Bounds Bounds { get; }
+		public int VertexCount
+		{
+			get;
+		}
+		public int IndexCount
+		{
+			get;
+		}
+		public int JobLength { get; }
+		public void Execute (int i, MeshJobTrianglesAndVertices _trianglesAndVertices);
 	}
-}
+	}

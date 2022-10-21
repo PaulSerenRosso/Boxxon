@@ -1,9 +1,8 @@
 {
-    "name": "PointGenerator",
+    "name": "ObjectHelper",
     "rootNamespace": "",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:8391ce04046b738448d1fe3392dc33b0"
+        "GUID:97c161e07a8a968488059914236ac6ce"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

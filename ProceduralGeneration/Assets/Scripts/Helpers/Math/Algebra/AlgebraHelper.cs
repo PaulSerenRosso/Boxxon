@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-static public class MathHelper
+static public class AlgebraHelper
 {
     public static bool IsClamp(this float _value, float _min, float _max)
     {

@@ -1,9 +1,9 @@
 {
-    "name": "MeshGenerator",
+    "name": "Triangulation",
     "rootNamespace": "",
     "references": [
         "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:49a853ba44746d745a3461ddd91c182b",
         "GUID:4ba1ce3fecaf2d94f9a03255d8b18ec5"
     ],
     "includePlatforms": [],

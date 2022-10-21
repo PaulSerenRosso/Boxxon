@@ -4,11 +4,13 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
- namespace MeshGenerator {
+namespace MeshGenerator
+{
 
 	[BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
 	public struct MeshJob : IJobFor
 	{
+		
 		private  IMeshGenerator generator ;
 		
 		[WriteOnly]
