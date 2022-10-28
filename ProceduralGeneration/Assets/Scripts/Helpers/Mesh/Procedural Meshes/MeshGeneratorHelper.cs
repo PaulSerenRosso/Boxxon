@@ -1,4 +1,5 @@
 
+using System;
 using Unity.Jobs;
 using UnityEngine;
 using GeometryHelpers;
@@ -34,9 +35,10 @@ namespace MeshGenerator
 		private static JobHandle LaunchMeshJob(int _innerloopBatchCount, TriangleGridMeshGenerator generator, Mesh mesh,
 			Mesh.MeshData meshData)
 		{
-			MeshJob job = new MeshJob(generator, mesh, meshData);
+			
+		//	MeshJob<IMeshGenerator> job = new MeshJob(generator, mesh, meshData);
 			JobHandle jobHandle = new JobHandle();
-			job.ScheduleParallel(generator.JobLength, _innerloopBatchCount, jobHandle);
+		//	job.ScheduleParallel(generator.JobLength, _innerloopBatchCount, jobHandle);
 			jobHandle.Complete();
 			return jobHandle;
 		}

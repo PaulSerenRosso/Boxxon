@@ -8,15 +8,15 @@ namespace MeshGenerator
 {
 
 	[BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
-	public struct MeshJob : IJobFor
+	public struct MeshJob<T> : IJobFor where T :struct, IMeshGenerator
 	{
 		
-		private  IMeshGenerator generator ;
+		private T generator ;
 		
 		[WriteOnly]
 		MeshJobTrianglesAndVertices trianglesAndVertices;
 		
-		public MeshJob(IMeshGenerator _generator,
+		public MeshJob(T _generator,
 			Mesh _mesh, Mesh.MeshData _meshData)
 		{
 			generator = _generator;
