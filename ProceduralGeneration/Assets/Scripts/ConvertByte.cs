@@ -33,11 +33,11 @@ public class ConvertByte : MonoBehaviour
             finalBit = finalBit << 7;
             finalBit = bitsWithoutMajorBit[i] | finalBit;
         }
-            Debug.Log(Convert.ToString(finalBit, 2));
-            Debug.Log(finalBit);
+//            Debug.Log(Convert.ToString(finalBit, 2));
+        //          Debug.Log(finalBit);
             for (int i = 0; i < signedByte.Length; i++)
             {
-                Debug.Log(signedByte[i]+"  "+i);
+          //      Debug.Log(signedByte[i]+"  "+i);
             }
     }
     

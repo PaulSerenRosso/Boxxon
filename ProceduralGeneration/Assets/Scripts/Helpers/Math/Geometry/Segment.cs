@@ -6,7 +6,7 @@ using UnityEngine;
 namespace GeometryHelpers
 {
     [Serializable]
-    public class Segment
+    public struct Segment
     {
         public Segment(Vector2 _pointA, Vector2 _pointB)
         {

@@ -5,6 +5,9 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+namespace AlgebraHelpers
+{
+    
 static public class AlgebraHelper
 {
     public static bool IsClamp(this float _value, float _min, float _max)
@@ -57,4 +60,5 @@ static public class AlgebraHelper
     }
 
 
+}
 }

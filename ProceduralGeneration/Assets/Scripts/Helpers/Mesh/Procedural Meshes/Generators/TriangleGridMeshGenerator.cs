@@ -24,9 +24,9 @@ namespace MeshGenerator
                 trianglesID[i] = _trianglesID[i];
             }
 
-            points = new NativeArray<float3>(points.Length, Allocator.TempJob);
+            points = new NativeArray<float3>(_points.Length, Allocator.TempJob);
             for (int i = 0; i < _points.Length; i++)
-            {
+            { 
                 points[i] = _points[i];
             }
             bounds = _bounds;

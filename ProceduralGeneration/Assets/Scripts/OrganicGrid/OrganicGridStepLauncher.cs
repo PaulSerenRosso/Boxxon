@@ -22,7 +22,8 @@ public class OrganicGridStepLauncher : MonoBehaviour
             startGridTransform == null ? Vector3.zero : startGridTransform.position);
         CreateBaseGridObjectPrefab();
         organicGridPointGeneration.LaunchOrganicGridPointGeneration(organicGridCoordinates);
-        organicGridTriangulation.LaunchOrganicGridTriangulation(organicGridCoordinates,organicGridPointGeneration.GetPointObjectsPosition());
+        organicGridTriangulation.LaunchOrganicGridTriangulation(organicGridCoordinates,organicGridPointGeneration.GetPoint2DPosition(),
+            organicGridPointGeneration.GetPoint3DPosition());
     }
 
     private void CreateBaseGridObjectPrefab()

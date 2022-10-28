@@ -11,13 +11,14 @@ namespace OrganicGrid
         [SerializeField] private PointObjectGenerator pointObjectGenerator;
 
         [SerializeField] private GameObject _pointObjectPrefab;
-        private Vector2[] points; 
+        private Vector2[] points;
+        private Vector3[] pointObjectsPosition;
         public void LaunchOrganicGridPointGeneration(OrganicGridCoordinates _organicGridCoordinates)
         { 
             PoissonDiskSampling pointGenerator =
                 new PoissonDiskSampling(_organicGridCoordinates.GridRect.size, minDistanceBetweenPoint, maxDistanceBetweenPoint);
         points =  pointGenerator.GeneratePoints();
-        Vector3[] pointObjectsPosition = ConvertPointsToPointObjectsPosition(_organicGridCoordinates.StartPosition);
+         pointObjectsPosition = ConvertPointsToPointObjectsPosition(_organicGridCoordinates.StartPosition);
         pointObjectGenerator.LaunchPointObjectGenerator( _pointObjectPrefab, pointObjectsPosition);
         }
 
@@ -36,9 +37,14 @@ namespace OrganicGrid
         {
             return pointObjectGenerator.GetPointObjects();
         }
-        public Vector2[] GetPointObjectsPosition()
+        public Vector2[] GetPoint2DPosition()
         {
             return points;
+        }
+        
+        public Vector3[] GetPoint3DPosition()
+        {
+            return pointObjectsPosition;
         }
     }
 }

@@ -8,7 +8,6 @@ namespace FlexMatrixHelper
     {
         public static FlexMatrix Multiply(this FlexMatrix _firstMatrix, FlexMatrix _secondMatrix)
         {
-            Debug.Log(_firstMatrix.RowLength + "   " + _secondMatrix.ColumnLength);
             if (_firstMatrix.RowLength == _secondMatrix.ColumnLength)
             {
                 FlexMatrix result = new FlexMatrix(_secondMatrix.RowLength, _firstMatrix.ColumnLength);
@@ -83,6 +82,83 @@ namespace FlexMatrixHelper
             }
 
             return result;
+        }
+
+        public static bool IsSquared(this FlexMatrix _matrix)
+        {
+            if (_matrix.ColumnLength == _matrix.RowLength)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static float GetDeterminant(this FlexMatrix _matrix)
+        {
+            float determinant = 0;
+            switch (_matrix.ColumnLength, _matrix.RowLength)
+            {
+                case (2, 2):
+                {
+                    FlexMatrixLine firstRow = _matrix.Rows[0]; 
+                    FlexMatrixLine secondRow = _matrix.Rows[1];
+                    determinant = firstRow.Values[0] * secondRow.Values[1] -
+                                  firstRow.Values[1] * secondRow.Values[0];
+                    break;
+                }
+                case (3, 3):
+                {
+                    FlexMatrixLine firstRow = _matrix.Rows[0]; 
+                    FlexMatrixLine secondRow = _matrix.Rows[1];
+                    FlexMatrixLine thirdRow = _matrix.Rows[2];
+                    determinant = firstRow.Values[0] * secondRow.Values[1] * thirdRow.Values[2]
+                                  + firstRow.Values[1] * secondRow.Values[2] * thirdRow.Values[0]
+                                  + firstRow.Values[2] * secondRow.Values[0] * thirdRow.Values[1]
+                                  - firstRow.Values[2] * secondRow.Values[1] * thirdRow.Values[0]
+                                  + firstRow.Values[1] * secondRow.Values[0] * thirdRow.Values[2]
+                                  + firstRow.Values[0] * secondRow.Values[2] * thirdRow.Values[1];
+                    break;
+                }
+                default:
+                {
+                    throw new Exception("Matrix must be equal to 2x2 or 3x3");
+                }
+            }
+            return determinant; 
+        }
+
+        public static FlexMatrix Inverse(this FlexMatrix _matrix)
+        {
+            float determinant = GetDeterminant(_matrix);
+            if (determinant == 0)
+            {
+                throw new Exception("Matrix must be valid");
+            }
+            
+            switch (_matrix.ColumnLength, _matrix.RowLength)
+            {
+                case (2, 2):
+                {
+                    float firstRowFirstElement = _matrix.Rows[1].Values[1]/determinant;
+                    float firstRowSecondElement = -_matrix.Rows[0].Values[1]/determinant ;
+                    float secondRowFirstElement = -_matrix.Rows[1].Values[0]/determinant ;
+                    float secondRowSecondElement = _matrix.Rows[0].Values[0]/determinant ;
+                    _matrix.Rows[0].Values[0] = firstRowFirstElement;
+                    _matrix.Rows[0].Values[1] = firstRowSecondElement;
+                    _matrix.Rows[1].Values[0] = secondRowFirstElement;
+                    _matrix.Rows[1].Values[1] = secondRowSecondElement;
+                    _matrix.UpdateColumns();
+                    break;
+                }
+                default:
+                {
+                    throw new Exception("Matrix must be equal to 2x2");
+                    break;
+                }
+            }
+            
+            return _matrix;
         }
     }
 }

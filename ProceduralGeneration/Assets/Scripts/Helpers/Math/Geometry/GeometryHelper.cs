@@ -1,32 +1,149 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
-
+using AlgebraHelpers;
+using FlexMatrixHelper;
 
 namespace GeometryHelpers
 {
     public static class GeometryHelper
     {
-        public static Circle GetTriangleCircumCircle(this Triangle2DPosition triangle2DPosition)
+        public static Vector2 GetTriangleCentroid(this Triangle2DPosition triangle2DPosition)
         {
-            float angleBAC = triangle2DPosition.GetTriangleVerticeAngle(0);
             float angleABC = triangle2DPosition.GetTriangleVerticeAngle(1);
-            float angleBCA = Mathf.PI - (angleABC + angleBAC);
+            float angleBAC = triangle2DPosition.GetTriangleVerticeAngle(0);
             float doubleSinAngleBAC = Mathf.Sin(angleBAC) * 2;
+            float angleBCA = Mathf.PI - (angleABC + angleBAC);
             float doubleSinAngleABC = Mathf.Sin(angleABC) * 2;
             float doubleSinAngleBCA = Mathf.Sin(angleBCA) * 2;
-            float circumCircleRadius = angleBAC / doubleSinAngleBAC;
-            float circumCircleCenterX = (triangle2DPosition.Vertices[0].x * doubleSinAngleBAC +
-                                         triangle2DPosition.Vertices[1].x * doubleSinAngleABC +
-                                         triangle2DPosition.Vertices[2].x * doubleSinAngleBCA) /
-                                        (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
-            float circumCircleCenterY = (triangle2DPosition.Vertices[0].y * doubleSinAngleBAC +
-                                         triangle2DPosition.Vertices[1].y * doubleSinAngleABC +
-                                         triangle2DPosition.Vertices[2].y * doubleSinAngleBCA) /
-                                        (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
-            Vector2 circumCircleCenter = new Vector2(circumCircleCenterX, circumCircleCenterY);
-            return new Circle(circumCircleCenter, circumCircleRadius);
+            var vertices = triangle2DPosition.Vertices;
+            float centroidX = (vertices[0].x * doubleSinAngleBAC +
+                               vertices[1].x * doubleSinAngleABC +
+                               vertices[2].x * doubleSinAngleBCA) /
+                              (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
+            float centroidY = (vertices[0].y * doubleSinAngleBAC +
+                               vertices[1].y * doubleSinAngleABC +
+                               vertices[2].y * doubleSinAngleBCA) /
+                              (doubleSinAngleABC + doubleSinAngleBAC + doubleSinAngleBCA);
+            Vector2 centroid = new Vector2(centroidX, centroidY);
+            return centroid;
         }
+
+        public static Circle GetTriangleCircumCircle(this Triangle2DPosition triangle2DPosition)
+        {
+            return new Circle(GetCircumcircleCenter(triangle2DPosition),
+                GetCircumcircleRadius(triangle2DPosition));
+        }
+
+        public static float GetCircumcircleRadius(this Triangle2DPosition triangle2DPosition)
+        {
+            float angleBAC = triangle2DPosition.GetTriangleVerticeAngle(0);
+            float edgeLengthBC = (triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[2]).magnitude;
+            float doubleSinAngleBAC = Mathf.Sin(angleBAC) * 2;
+            float circumCircleRadius = edgeLengthBC / doubleSinAngleBAC;
+            return circumCircleRadius;
+        }
+
+        public static Vector2 GetCircumcircleCenter(this Triangle2DPosition triangle2DPosition)
+        {
+            List<LinearEquation> linearEquationOfMediators = new List<LinearEquation>();
+            int xIsKnew = -1;
+            int yIsKnew = -1;
+            for (int i = 0; i < triangle2DPosition.Vertices.Length - 1; i++)
+            {
+                linearEquationOfMediators.Add(triangle2DPosition.GetLinearEquationOfMediator(i, i + 1));
+                if (linearEquationOfMediators[i].x != 0)
+                {
+                    xIsKnew = i;
+                }
+                else if (linearEquationOfMediators[i].y != 0)
+                {
+                    yIsKnew = i;
+                }
+            }
+
+            if (xIsKnew == -1 && yIsKnew == -1)
+            {
+                for (int i = 0; i < linearEquationOfMediators.Count; i++)
+                {
+                    LinearEquation mediator = linearEquationOfMediators[i];
+                    mediator.b *= -1;
+                    linearEquationOfMediators[i] = mediator;
+                }
+
+                FlexMatrix directorCoefficientMatrix = new FlexMatrix(new FlexMatrixLine[]
+                    {
+                        new FlexMatrixLine(new float[] {linearEquationOfMediators[0].a, -1}),
+                        new FlexMatrixLine(new float[] {linearEquationOfMediators[1].a, -1})
+                    }
+                );
+                directorCoefficientMatrix = directorCoefficientMatrix.Inverse();
+
+                FlexMatrix originOrderer = new FlexMatrix(new FlexMatrixLine[]
+                    {
+                        new FlexMatrixLine(new float[] {linearEquationOfMediators[0].b}),
+                        new FlexMatrixLine(new float[] {linearEquationOfMediators[1].b})
+                    }
+                );
+                return directorCoefficientMatrix.Multiply(originOrderer);
+            }
+            else if (xIsKnew != -1 && yIsKnew == -1)
+            {
+                float xValue = linearEquationOfMediators[xIsKnew].x;
+                linearEquationOfMediators.RemoveAt(xIsKnew);
+                return new Vector2(xValue, linearEquationOfMediators[0].a * xValue + linearEquationOfMediators[0].b);
+            }
+            else if (yIsKnew != -1 && xIsKnew == -1)
+            {
+                float yValue = linearEquationOfMediators[yIsKnew].y;
+                linearEquationOfMediators.RemoveAt(yIsKnew);
+                return new Vector2((-linearEquationOfMediators[0].b + yValue) / linearEquationOfMediators[0].a, yValue);
+            }
+            else
+            {
+                return new Vector2(linearEquationOfMediators[xIsKnew].x, linearEquationOfMediators[yIsKnew].y);
+            }
+        }
+
+        public static LinearEquation GetLinearEquationOfLine(this Vector2 _firstPoint, Vector2 _secondPoint)
+        {
+            float a = 0;
+            float b = 0;
+            float x = 0;
+            float y = 0;
+            if (Math.Abs(_firstPoint.x - _secondPoint.x) > 0.01)
+            {
+                a = (_secondPoint.y - _firstPoint.y) / (_secondPoint.x - _firstPoint.x);
+                if (a != 0)
+                {
+                    b = -(a * _firstPoint.x - _firstPoint.y);
+                }
+                else
+                {
+                    y = _firstPoint.y;
+                }
+            }
+            else
+            {
+                x = _firstPoint.x;
+            }
+
+            return new LinearEquation(a, b, x, y);
+        }
+
+
+        public static LinearEquation GetLinearEquationOfMediator(this Triangle2DPosition _triangle2DPosition,
+            int _firstvertexIndex,
+            int _secondVertexIndex)
+        {
+            Vector2 edgeDirection = _triangle2DPosition.Vertices[_secondVertexIndex] -
+                                    _triangle2DPosition.Vertices[_firstvertexIndex];
+            Vector2 midEdgePoint = _triangle2DPosition.Vertices[_firstvertexIndex] + (edgeDirection / 2);
+            Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x).normalized;
+            return midEdgePoint.GetLinearEquationOfLine(secondPoint);
+        }
+
 
         public static float GetTriangleVerticeAngle(this Triangle2DPosition triangle2DPosition, int vertex)
         {
@@ -35,19 +152,22 @@ namespace GeometryHelpers
             {
                 case 0:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[0] - triangle2DPosition.Vertices[1]).normalized,
+                    angle = Mathf.Acos(Vector2.Dot(
+                        (triangle2DPosition.Vertices[0] - triangle2DPosition.Vertices[1]).normalized,
                         (triangle2DPosition.Vertices[0] - triangle2DPosition.Vertices[2]).normalized));
                     break;
                 }
                 case 1:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[0]).normalized,
+                    angle = Mathf.Acos(Vector2.Dot(
+                        (triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[0]).normalized,
                         (triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[2]).normalized));
                     break;
                 }
                 case 2:
                 {
-                    angle = Mathf.Acos(Vector2.Dot((triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[0]).normalized,
+                    angle = Mathf.Acos(Vector2.Dot(
+                        (triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[0]).normalized,
                         (triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[1]).normalized));
                     break;
                 }
@@ -77,33 +197,37 @@ namespace GeometryHelpers
         {
             return new Segment[3]
             {
-                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]), new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[2]),
+                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]),
+                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[2]),
                 new(triangle2DPosition.Vertices[1], triangle2DPosition.Vertices[2])
             };
         }
 
         public static bool TriangleHasEdge(this Triangle2DPosition triangle2DPosition, Segment _segment)
         {
+            int sharedVerticesCount = 0;
             for (int j = 0; j < _segment.Points.Length; j++)
             {
                 for (int i = 0; i < triangle2DPosition.Vertices.Length; i++)
                 {
-                    int sharedVerticesCount = 0;
                     if (triangle2DPosition.Vertices[i] == _segment.Points[j])
                     {
                         sharedVerticesCount++;
-                        if (sharedVerticesCount == 2)
-                        {
-                            return true;
-                        }
+                     
                     }
                 }
+            }
+
+            if (sharedVerticesCount == 2)
+            {
+                return true;
             }
 
             return false;
         }
 
-        public static bool TrianglesHaveOneSharedVertex(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
+        public static bool TrianglesHaveOneSharedVertex(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
         {
             for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
@@ -119,7 +243,8 @@ namespace GeometryHelpers
             return false;
         }
 
-        public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
+        public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
         {
             for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
@@ -135,9 +260,10 @@ namespace GeometryHelpers
             throw new Exception("Triangles don't have one same vertex");
         }
 
-        public static Quad CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB, Segment _communEdge)
+        public static Quad CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB, Segment _communEdge)
         {
-            Triangle2DPosition[] triangles = new[] { triangle2DPositionA, triangle2DPositionB };
+            Triangle2DPosition[] triangles = new[] {triangle2DPositionA, triangle2DPositionB};
             //check pour 
             List<Vector2> unsharedPoints = new List<Vector2>();
             for (int i = 0; i < _communEdge.Points.Length; i++)
@@ -159,7 +285,8 @@ namespace GeometryHelpers
             return new Quad(_communEdge.Points[0], _communEdge.Points[1], unsharedPoints[0], unsharedPoints[1]);
         }
 
-        public static bool TrianglesHaveOneSameEdge(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
+        public static bool TrianglesHaveOneSameEdge(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
         {
             int verticesCount = 0;
             for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
@@ -176,7 +303,8 @@ namespace GeometryHelpers
             return verticesCount == 2;
         }
 
-        public static Segment GetSameEdgeOfTriangles(this Triangle2DPosition triangle2DPositionA, Triangle2DPosition triangle2DPositionB)
+        public static Segment GetSameEdgeOfTriangles(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
         {
             List<Vector2> sameVertices = new List<Vector2>();
             for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
@@ -205,6 +333,7 @@ namespace GeometryHelpers
             {
                 center += _vertices[i];
             }
+
             center /= _vertices.Length;
             return center;
         }
@@ -217,8 +346,10 @@ namespace GeometryHelpers
             {
                 midEdgePoints.Add((_vertices[i] + _vertices[i + 1]) / 2);
             }
+
             return midEdgePoints;
         }
+
         public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices)
         {
             Vector2 center = GetPolygonCenter(_vertices);
@@ -232,6 +363,5 @@ namespace GeometryHelpers
             quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
             return quads;
         }
-        
     }
 }

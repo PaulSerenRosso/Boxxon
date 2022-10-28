@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AlgebraHelpers;
 using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;

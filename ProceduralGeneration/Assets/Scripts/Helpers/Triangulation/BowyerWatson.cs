@@ -11,10 +11,14 @@ namespace Triangulation
 
         private float superTriangleBaseEdgeOffset;
 
-       protected Triangle2DPosition superTriangle2DPosition;
-      protected  Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle = new Dictionary<Triangle2DPosition, Circle>();
+        public Triangle2DPosition superTriangle2DPosition;
+        
+
+        protected Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle =
+            new Dictionary<Triangle2DPosition, Circle>();
+
         Dictionary<Triangle2DPosition, Segment[]> trianglesWithEdges = new Dictionary<Triangle2DPosition, Segment[]>();
-       protected private Vector2[] points;
+        protected private Vector2[] points;
 
         public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points)
         {
@@ -33,6 +37,7 @@ namespace Triangulation
 
             throw new Exception("Points are not defined please set Points First");
         }
+
         public Triangle2DPosition[] Triangulate()
         {
             trianglesWithCircumCircle.Add(superTriangle2DPosition, superTriangle2DPosition.GetTriangleCircumCircle());
@@ -40,26 +45,23 @@ namespace Triangulation
             {
                 var trianglesChoosen = ChooseTriangles(i);
 
-                var polygone = CreatePolygone(trianglesChoosen);
+                var polygon = CreatePolygon(trianglesChoosen);
+                CreateNewTriangles(polygon, i);
                 RemoveChoosenTriangle(trianglesChoosen);
-
-                CreateNewTriangles(polygone, i);
             }
 
             var triangles = GetTriangleWhichSharedVerticesWithSuperTriangle();
 
-            // delete tous les triangles qui partages des vertices avec au moins deux vertices avec le super triangles 
             return triangles.ToArray();
         }
+
         Segment[] GetTriangleEdges(Triangle2DPosition _triangle2DPosition)
         {
-            if (!trianglesWithEdges.ContainsKey(_triangle2DPosition))
-            {
-                trianglesWithEdges.Add(_triangle2DPosition, _triangle2DPosition.GetSegmentsInTriangles());
-            }
+            trianglesWithEdges.Add(_triangle2DPosition, _triangle2DPosition.GetSegmentsInTriangles());
 
             return trianglesWithEdges[_triangle2DPosition];
         }
+
         private List<Triangle2DPosition> ChooseTriangles(int _i)
         {
             List<Triangle2DPosition> trianglesChoosen = new List<Triangle2DPosition>();
@@ -75,52 +77,61 @@ namespace Triangulation
             return trianglesChoosen;
         }
 
-        private List<Segment> CreatePolygone(List<Triangle2DPosition> _trianglesChoosen)
+        private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
         {
-            List<Segment> polygone = new List<Segment>();
-
+            List<Segment> polygon = new List<Segment>();
             for (int j = 0; j < _trianglesChoosen.Count; j++)
             {
                 Segment[] triangleEdges = GetTriangleEdges(_trianglesChoosen[j]);
                 for (int k = 0; k < triangleEdges.Length; k++)
                 {
-                    for (int l = 0; l < _trianglesChoosen.Count; l++)
+                    bool isValid = true;
+                    for (int i = 0; i < polygon.Count; i++)
                     {
-                        if (j != l && _trianglesChoosen[l].TriangleHasEdge(triangleEdges[k]))
+                        int sharedVertex = 0;
+                        for (int l = 0; l < triangleEdges[k].Points.Length; l++)
                         {
-                            if (!polygone.Contains(triangleEdges[k]))
+                            if (triangleEdges[k].Points[l] == polygon[i].Points[0] ||
+                                triangleEdges[k].Points[l] == polygon[i].Points[1])
                             {
-                                polygone.Add(triangleEdges[k]);
-                            }
-                            else
-                            {
-                                polygone.Remove(triangleEdges[k]);
+                                sharedVertex++;
+                                if (sharedVertex == 2)
+                                {
+                                    polygon.RemoveAt(i);
+                                    isValid = false;
+                                }
                             }
                         }
+                    }
+                    if (isValid)
+                    {
+                        polygon.Add(triangleEdges[k]);
                     }
                 }
             }
 
-            return polygone;
+            return polygon;
         }
+
         private void RemoveChoosenTriangle(List<Triangle2DPosition> _trianglesChoosen)
         {
             for (int j = _trianglesChoosen.Count - 1; j >= 0; j--)
             {
                 trianglesWithEdges.Remove(_trianglesChoosen[j]);
+                trianglesWithCircumCircle.Remove(_trianglesChoosen[j]);
             }
         }
-        protected virtual void CreateNewTriangles(List<Segment> _polygone, int i)
+
+        protected void CreateNewTriangles(List<Segment> _polygone, int i)
         {
             for (int j = 0; j < _polygone.Count; j++)
             {
                 Triangle2DPosition newTriangle2DPosition =
                     new Triangle2DPosition(points[i], _polygone[j].Points[0], _polygone[j].Points[1]);
-
                 trianglesWithCircumCircle.Add(newTriangle2DPosition, newTriangle2DPosition.GetTriangleCircumCircle());
             }
         }
-        
+
         protected virtual List<Triangle2DPosition> GetTriangleWhichSharedVerticesWithSuperTriangle()
         {
             List<Triangle2DPosition> triangles = new List<Triangle2DPosition>();
@@ -134,7 +145,5 @@ namespace Triangulation
 
             return triangles;
         }
-
-
     }
 }
