@@ -5,8 +5,8 @@ using static Unity.Mathematics.math;
 
 namespace MeshGenerator
 {
-	/*
-	public struct SquareGrid : MeshGenerator
+	
+	public struct SquareGrid : IMeshGenerator
 
 	{
 
@@ -50,10 +50,10 @@ namespace MeshGenerator
 			vertex.TexCoord0 = 1f;
 			_trianglesAndVertices.SetVertex(vi + 3, vertex);
 
-			_trianglesAndVertices.SetTriangle(ti + 0, vi + int3(0, 2, 1));
-			_trianglesAndVertices.SetTriangle(ti + 1, vi + int3(1, 2, 3));
+			_trianglesAndVertices.SetTriangle(ti + 0, new int3( vi+0, vi+2, vi+1));
+			_trianglesAndVertices.SetTriangle(ti + 1, new int3(vi+1, vi+2, vi+3));
 		}
 	}
 	}
-	*/
+	
 }

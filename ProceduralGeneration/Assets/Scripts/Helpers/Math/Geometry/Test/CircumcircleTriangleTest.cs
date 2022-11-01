@@ -47,7 +47,7 @@ public class CircumcircleTriangleTest : MonoBehaviour
         for (int i = 0; i <triangle.Vertices.Length-1 ; i++)
         {
             Gizmos.color = Color.green;
-        Gizmos.DrawLine(midPoint[i],circle.center);
+            Gizmos.DrawLine(midPoint[i],circle.center);
         }
  
    }

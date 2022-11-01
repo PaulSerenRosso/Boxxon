@@ -1,6 +1,8 @@
 using System;
+using JobHelpers;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -15,7 +17,8 @@ namespace MeshGenerator
 		
 		[WriteOnly]
 		MeshJobTrianglesAndVertices trianglesAndVertices;
-		
+	
+
 		public MeshJob(T _generator,
 			Mesh _mesh, Mesh.MeshData _meshData)
 		{
@@ -26,13 +29,19 @@ namespace MeshGenerator
 				generator.VertexCount,
 				generator.IndexCount
 			);
+	
 			trianglesAndVertices = new MeshJobTrianglesAndVertices();
 			trianglesAndVertices.Setup(_meshData);
 		}
 		
 		// mettre le constructeur du generator dans le helper
-		
-		public void Execute (int i) => generator.Execute(i, trianglesAndVertices);
+
+		public void Execute(int i)
+		{
+			generator.Execute(i, trianglesAndVertices);
+		//	NativeArray<Vertex> nativeArray = meshData.GetVertexData<Vertex>();
+//			JobHelper.Log("in job"+nativeArray[nativeArray.Length-1].Position);
+		} 
 		
 	}
 }

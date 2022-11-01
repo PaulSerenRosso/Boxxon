@@ -14,8 +14,8 @@ namespace Triangulation
         private TriangleID[] trianglesID;
         private List<Vector2> pointList = new List<Vector2>();
 
-        public BowyerWatsonWithTriangleID(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points) : base(
-            _rect, _superTriangleBaseEdgeOffset, _points)
+        public BowyerWatsonWithTriangleID(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle) : base(
+            _rect, _superTriangleBaseEdgeOffset, _points, _maxAngle)
         {
             pointList = _points.ToList();
         }
@@ -30,7 +30,7 @@ namespace Triangulation
             throw new Exception("TrianglesID are not defined please launch Triangulation");
         }
         
-        protected override List<Triangle2DPosition> GetTriangleWhichSharedVerticesWithSuperTriangle()
+        protected override List<Triangle2DPosition> FilterTriangles()
         {
             List<Triangle2DPosition> triangles = new List<Triangle2DPosition>();
             List<TriangleID> newTrianglesID = new List<TriangleID>();
@@ -38,14 +38,31 @@ namespace Triangulation
             {
                 if (!superTriangle2DPosition.TrianglesHaveOneSharedVertex(triangle.Key))
                 {
-                    triangles.Add(triangle.Key);
+                    Vector2[] vertices = triangle.Key.Vertices;
+                    bool hasTooLargeAngle = false;
+                    Vector2[] edgesVector = new []{vertices[1] - vertices[0],vertices[2] - vertices[1], vertices[0] - vertices[2] };
+                    float[] verticesAngle = new float[3];
+                    verticesAngle[0] = Vector2.Angle(-edgesVector[0], edgesVector[1]);
+                    verticesAngle[1] = Vector2.Angle(-edgesVector[1], edgesVector[2]);
+                    verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
+                    for (int i = 0; i < verticesAngle.Length; i++)
+                    {
+                        if (verticesAngle[i] > maxAngle)
+                        {
+                            hasTooLargeAngle = true;
+                            break; 
+                        }
+                    }
+                    if (!hasTooLargeAngle)
+                    {
+                        triangles.Add(triangle.Key);
                     int[] indexes = new int[3];
                     for (int i = 0; i < triangle.Key.Vertices.Length; i++)
                     {
                        indexes[i] = pointList.IndexOf(triangle.Key.Vertices[i]);
                     }
-               
                     newTrianglesID.Add(new TriangleID(indexes));
+                    }
                 }
             }
             trianglesID = newTrianglesID.ToArray();

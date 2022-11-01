@@ -123,6 +123,39 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &329306275
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 329306276}
+  m_Layer: 0
+  m_Name: ==Test==
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &329306276
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 329306275}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.62849844, y: 1.7848393, z: 0.023482084}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 961775140}
+  - {fileID: 1851231448}
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &473404558
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,7 +454,7 @@ GameObject:
   - component: {fileID: 752809549}
   - component: {fileID: 752809550}
   m_Layer: 0
-  m_Name: ObjectTriangulation
+  m_Name: Organic Grid Triangulation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -471,6 +504,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   superTriangleBaseEdgeOffset: 5
   objectTriangulation: {fileID: 752809549}
+  maxAngleForTriangle: 120
+--- !u!1 &961775138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 961775140}
+  - component: {fileID: 961775139}
+  m_Layer: 0
+  m_Name: 'Circumcircle Of Triangle Test '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &961775139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961775138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f460d48435798e643b5b546d664a96b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vertexA: {x: 0, y: 0}
+  vertexB: {x: 0, y: 0}
+  vertexC: {x: 0, y: 0}
+--- !u!4 &961775140
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961775138}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329306276}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &997909263
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,7 +563,7 @@ GameObject:
   - component: {fileID: 997909265}
   - component: {fileID: 997909264}
   m_Layer: 0
-  m_Name: OrganicGrid
+  m_Name: Organic Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -665,7 +746,7 @@ GameObject:
   - component: {fileID: 1432596980}
   - component: {fileID: 1432596981}
   m_Layer: 0
-  m_Name: GenerateGridPointGenerator
+  m_Name: Organic Grid Point Generator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -715,6 +796,71 @@ MonoBehaviour:
   pointObjectGenerator: {fileID: 1432596980}
   _pointObjectPrefab: {fileID: 7244053421150730146, guid: beda66ee06889684db1c57f080a848cf,
     type: 3}
+--- !u!1 &1851231446
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1851231448}
+  - component: {fileID: 1851231447}
+  m_Layer: 0
+  m_Name: 'Triangulation Test '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1851231447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851231446}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5135c87e83c1c4144a17c6cd29c454ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 5
+    height: 5
+  points:
+  - {x: 2, y: 1}
+  - {x: 4, y: 5}
+  - {x: 0, y: 3}
+  - {x: 3, y: 5}
+  - {x: 5, y: 3}
+  - {x: 2, y: 4}
+  - {x: 1, y: 3}
+  superTriangleBaseEdgeOffset: 5
+  maxAngleForTriangle: 120
+  tests: []
+  circlesOfFinalTriangles: []
+  drawFinalTriangles: 
+  drawSuperTriangle: 0
+  seeCircum: 
+--- !u!4 &1851231448
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851231446}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329306276}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2011041220
 GameObject:
   m_ObjectHideFlags: 0
@@ -725,7 +871,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2011041221}
   m_Layer: 0
-  m_Name: OrganicGridParent
+  m_Name: Organic Grid Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -756,7 +902,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2013047737}
   m_Layer: 0
-  m_Name: OrganicStartPosition
+  m_Name: Organic Start Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

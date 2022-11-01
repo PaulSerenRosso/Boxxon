@@ -1,11 +1,8 @@
 {
-    "name": "MeshGenerator",
+    "name": "JobHelpers",
     "rootNamespace": "",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:2665a8d13d1b3f18800f46e256720795",
-        "GUID:4ba1ce3fecaf2d94f9a03255d8b18ec5",
-        "GUID:1057189cdc852e6449d885aba76b6a77"
+        "GUID:2665a8d13d1b3f18800f46e256720795"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

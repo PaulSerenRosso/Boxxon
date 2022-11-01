@@ -1,5 +1,6 @@
+using System;
 using UnityEngine;
-
+[Serializable]
 public struct Circle 
 {
     public Vector2 center;

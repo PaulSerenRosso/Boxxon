@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using GeometryHelpers;
+using JobHelpers;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -10,7 +11,9 @@ namespace MeshGenerator
     public struct TriangleGridMeshGenerator : IMeshGenerator
     {
         // index count c'est le nombre de vertices et vertexcount c'est le nombre de point 
+        [NativeDisableParallelForRestriction]
         private NativeArray<TriangleID> trianglesID;
+        [NativeDisableParallelForRestriction]
         private NativeArray<float3> points;
 
         //   const float2 firstUVCoord; 
@@ -60,22 +63,26 @@ namespace MeshGenerator
             Vertex vertexA = new Vertex();
             var pointA = points[trianglesID[i].A];
             vertexA.Position = pointA;
+            vertexA.TexCoord0 = new float2(0, 0);
             var indexA = i * 3;
             _trianglesAndVertices.SetVertex(indexA, vertexA);
 
             Vertex vertexB = new Vertex();
             var pointB = points[trianglesID[i].B];
-            vertexA.Position = pointB;
+            vertexB.Position = pointB;
+            vertexB.TexCoord0 = new float2(1, 0);
+            
             var indexB = i * 3+1;
             _trianglesAndVertices.SetVertex(indexB, vertexB);
             
             Vertex vertexC = new Vertex();
             var pointC = points[trianglesID[i].C];
-            vertexA.Position = pointC;
+            vertexC.Position = pointC;
+            vertexC.TexCoord0 = new float2(0, 1);
             var indexC = i * 3+2;
-            
             _trianglesAndVertices.SetVertex(indexC, vertexC);
-            _trianglesAndVertices.SetTriangle(i,new int3( indexA, indexB, indexC));
+            
+            _trianglesAndVertices.SetTriangle(i,new int3(indexA,indexB,indexC) );
         }
     }
 }

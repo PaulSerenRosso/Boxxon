@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using GeometryHelpers;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Triangulation
 {
-    public class BowyerWatson
+    public class BowyerWatsonTest
     {
         private Rect rect;
 
@@ -21,9 +22,10 @@ namespace Triangulation
         public Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle =
             new Dictionary<Triangle2DPosition, Circle>();
 
+        public TriangulationTest[] Tests;
         protected private Vector2[] points;
 
-        public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle)
+        public BowyerWatsonTest(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle)
         {
             rect = _rect;
             maxAngle = _maxAngle;
@@ -45,12 +47,28 @@ namespace Triangulation
         public Triangle2DPosition[] Triangulate()
         {
             trianglesWithCircumCircle.Add(superTriangle2DPosition, superTriangle2DPosition.GetTriangleCircumCircle());
-
+            Tests = new TriangulationTest[points.Length];
             for (int i = 0; i < points.Length; i++)
             {
+                Tests[i] = new TriangulationTest();
+                Tests[i].point = points[i];
+                Tests[i].currentTriangles = new List<Triangle2DPosition>();
+                foreach (var triangle in trianglesWithCircumCircle)
+                {
+                    Tests[i].currentTriangles.Add(triangle.Key);
+                }
+
                 var trianglesChoosen = ChooseTriangles(i);
+                
                 var polygon = CreatePolygon(trianglesChoosen);
+                Tests[i].polygon = polygon;
                 RemoveChoosenTriangle(trianglesChoosen);
+                Tests[i].trianglesWithoutTrianglesChoosen = new List<Triangle2DPosition>();
+                foreach (var triangle in trianglesWithCircumCircle)
+                {
+                    Tests[i].trianglesWithoutTrianglesChoosen.Add(triangle.Key);
+                }
+
                 CreateNewTriangles(polygon, i);
             }
 
@@ -67,12 +85,18 @@ namespace Triangulation
         private List<Triangle2DPosition> ChooseTriangles(int _i)
         {
             List<Triangle2DPosition> trianglesChoosen = new List<Triangle2DPosition>();
+            Tests[_i].trianglesChoosen = new List<Triangle2DPosition>();
+            Tests[_i].circlesOfTrianglesChoosen = new List<Circle>();
+            Tests[_i].trianglesChoosenWithCircle = new Dictionary<Triangle2DPosition, Circle>();
             foreach (var triangleWithCircumCircle in trianglesWithCircumCircle)
             {
                 if ((points[_i] - triangleWithCircumCircle.Value.center).sqrMagnitude <=
                     triangleWithCircumCircle.Value.radius * triangleWithCircumCircle.Value.radius)
                 {
                     trianglesChoosen.Add(triangleWithCircumCircle.Key);
+                    Tests[_i].trianglesChoosenWithCircle.Add(triangleWithCircumCircle.Key, triangleWithCircumCircle.Value);
+                    Tests[_i].trianglesChoosen.Add(triangleWithCircumCircle.Key);
+                    Tests[_i].circlesOfTrianglesChoosen.Add((triangleWithCircumCircle.Value));
                 }
             }
 
@@ -122,7 +146,8 @@ namespace Triangulation
 
             return polygon;
         }
-        
+
+
         private void RemoveChoosenTriangle(List<Triangle2DPosition> _trianglesChoosen)
         {
             for (int i = 0; i < _trianglesChoosen.Count; i++)
@@ -133,10 +158,12 @@ namespace Triangulation
 
         protected void CreateNewTriangles(List<Segment> _polygone, int i)
         {
+            Tests[i].newTriangles = new List<Triangle2DPosition>();
             for (int j = 0; j < _polygone.Count; j++)
             {
                 Triangle2DPosition newTriangle2DPosition =
                     new Triangle2DPosition(points[i], _polygone[j].Points[0], _polygone[j].Points[1]);
+                Tests[i].newTriangles.Add(newTriangle2DPosition);
                 var triangleCircumCircle = newTriangle2DPosition.GetTriangleCircumCircle();
                 trianglesWithCircumCircle.Add(newTriangle2DPosition, triangleCircumCircle);
             }

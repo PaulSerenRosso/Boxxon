@@ -12,7 +12,7 @@ namespace GeometryHelpers
       {
          get => vertices;
       }
-      
+      [SerializeField]
       private Vector2[] vertices; 
       
       public Triangle2DPosition(Vector2 _vertexA, Vector2 _vertexB, Vector2 _vertexC)

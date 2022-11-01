@@ -53,11 +53,11 @@ namespace GeometryHelpers
             for (int i = 0; i < triangle2DPosition.Vertices.Length - 1; i++)
             {
                 linearEquationOfMediators.Add(triangle2DPosition.GetLinearEquationOfMediator(i, i + 1));
-                if (linearEquationOfMediators[i].x != 0)
+                if (linearEquationOfMediators[i].hasX)
                 {
                     xIsKnew = i;
                 }
-                else if (linearEquationOfMediators[i].y != 0)
+                else if (linearEquationOfMediators[i].hasY)
                 {
                     yIsKnew = i;
                 }
@@ -88,22 +88,22 @@ namespace GeometryHelpers
                 );
                 return directorCoefficientMatrix.Multiply(originOrderer);
             }
-            else if (xIsKnew != -1 && yIsKnew == -1)
+
+            if (xIsKnew != -1 && yIsKnew == -1)
             {
                 float xValue = linearEquationOfMediators[xIsKnew].x;
                 linearEquationOfMediators.RemoveAt(xIsKnew);
                 return new Vector2(xValue, linearEquationOfMediators[0].a * xValue + linearEquationOfMediators[0].b);
             }
-            else if (yIsKnew != -1 && xIsKnew == -1)
+
+            if (yIsKnew != -1 && xIsKnew == -1)
             {
                 float yValue = linearEquationOfMediators[yIsKnew].y;
                 linearEquationOfMediators.RemoveAt(yIsKnew);
                 return new Vector2((-linearEquationOfMediators[0].b + yValue) / linearEquationOfMediators[0].a, yValue);
             }
-            else
-            {
-                return new Vector2(linearEquationOfMediators[xIsKnew].x, linearEquationOfMediators[yIsKnew].y);
-            }
+            
+            return new Vector2(linearEquationOfMediators[xIsKnew].x, linearEquationOfMediators[yIsKnew].y);
         }
 
         public static LinearEquation GetLinearEquationOfLine(this Vector2 _firstPoint, Vector2 _secondPoint)
@@ -112,7 +112,9 @@ namespace GeometryHelpers
             float b = 0;
             float x = 0;
             float y = 0;
-            if (Math.Abs(_firstPoint.x - _secondPoint.x) > 0.01)
+            bool hasY = false;
+            bool hasX = false;
+            if (_secondPoint.x != _firstPoint.x)
             {
                 a = (_secondPoint.y - _firstPoint.y) / (_secondPoint.x - _firstPoint.x);
                 if (a != 0)
@@ -122,16 +124,17 @@ namespace GeometryHelpers
                 else
                 {
                     y = _firstPoint.y;
+                    hasY = true;
                 }
             }
             else
             {
                 x = _firstPoint.x;
+                hasX = true;
             }
 
-            return new LinearEquation(a, b, x, y);
+            return new LinearEquation(a, b, x, y, hasX, hasY);
         }
-
 
         public static LinearEquation GetLinearEquationOfMediator(this Triangle2DPosition _triangle2DPosition,
             int _firstvertexIndex,
@@ -140,7 +143,7 @@ namespace GeometryHelpers
             Vector2 edgeDirection = _triangle2DPosition.Vertices[_secondVertexIndex] -
                                     _triangle2DPosition.Vertices[_firstvertexIndex];
             Vector2 midEdgePoint = _triangle2DPosition.Vertices[_firstvertexIndex] + (edgeDirection / 2);
-            Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x).normalized;
+            Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x).normalized * 1000;
             return midEdgePoint.GetLinearEquationOfLine(secondPoint);
         }
 
@@ -198,8 +201,8 @@ namespace GeometryHelpers
             return new Segment[3]
             {
                 new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]),
-                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[2]),
-                new(triangle2DPosition.Vertices[1], triangle2DPosition.Vertices[2])
+                new(triangle2DPosition.Vertices[1], triangle2DPosition.Vertices[2]),
+                new(triangle2DPosition.Vertices[2], triangle2DPosition.Vertices[0])
             };
         }
 
@@ -213,7 +216,6 @@ namespace GeometryHelpers
                     if (triangle2DPosition.Vertices[i] == _segment.Points[j])
                     {
                         sharedVerticesCount++;
-                     
                     }
                 }
             }
