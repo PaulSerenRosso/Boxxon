@@ -51,7 +51,9 @@ namespace Triangulation
                 var trianglesChoosen = ChooseTriangles(i);
 
                 var triangleWhichContainCurrentPoint = GetTriangleWithCurrentPoint(trianglesChoosen, i);
-                var polygon = CreatePolygon(trianglesChoosen, triangleWhichContainCurrentPoint);
+                var filteredTrianglesChoosen =
+                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint);
+                var polygon = CreatePolygon(filteredTrianglesChoosen);
                 RemoveChoosenTriangle(trianglesChoosen);
                 CreateNewTriangles(polygon, i);
             }
@@ -93,33 +95,42 @@ namespace Triangulation
             throw new Exception("Triangles choosen List doesn't contain the triangle which contain the current point");
         }
 
-
-        private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
+        private List<Triangle2DPosition> FilteredTrianglesChoosen(List <Triangle2DPosition>_trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
         {
-            var polygon = CreatePolygonWithNoOneDuplication(_trianglesChoosen);
-            
-           int[] sharedVerticesCount = new int[polygon.Count];
-            
-            for (int i = polygon.Count-1; i > -1; i--)
+            Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
+            List<Triangle2DPosition> filteredTriangleChoosen = new List<Triangle2DPosition>();
+            List<Triangle2DPosition> trianglesWhichNeedToCheckNeighboursTriangles = new List<Triangle2DPosition>();
+            bool needNewIteration = true;
+            trianglesWhichNeedToCheckNeighboursTriangles.Add(currentTriangle);
+            while (needNewIteration)
             {
-                for (int j = polygon.Count-1; j > -1; j--)
+                for (int i = _trianglesChoosen.Count-1; i >-1 ; i--)
                 {
-                  sharedVerticesCount[i] += polygon[i].GetSharedVertices(polygon[j]);
+                    if (currentTriangle.TrianglesHaveTwoSharedVertices(_trianglesChoosen[i]))
+                    {
+                        filteredTriangleChoosen.Add(_trianglesChoosen[i]);
+                        trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
+                        _trianglesChoosen.RemoveAt(i);
+                    }
                 }
-
-                if (sharedVerticesCount[i] != 2)
+                trianglesWhichNeedToCheckNeighboursTriangles.Remove(currentTriangle);
+                if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
                 {
-                    polygon.RemoveAt(i);
+                    needNewIteration = true;
+                    currentTriangle = trianglesWhichNeedToCheckNeighboursTriangles[0];
+                }
+                else
+                {
+                    needNewIteration = false;
                 }
             }
+            return filteredTriangleChoosen;
+        }
 
-            
-
-
-            // check si les edges ont deux fois les memes
-            
-            // check si un points puis un points 
-            return polygon;
+        private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
+        {
+            var polygonWithNoOneDuplication = CreatePolygonWithNoOneDuplication(_trianglesChoosen);
+            return polygonWithNoOneDuplication;
         }
 
         private List<Segment> CreatePolygonWithNoOneDuplication(List<Triangle2DPosition> _trianglesChoosen)

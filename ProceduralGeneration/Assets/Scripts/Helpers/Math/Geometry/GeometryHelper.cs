@@ -273,8 +273,12 @@ namespace GeometryHelpers
                     }
                 }
             }
+     
             return sharedVerticesCount;
         }
+
+        public static readonly Triangle2DPosition Triangle2DPositionZero =
+            new Triangle2DPosition(Vector2.zero, Vector2.zero, Vector2.zero);
 
         public static bool TrianglesHaveOneSharedVertex(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
@@ -290,6 +294,29 @@ namespace GeometryHelpers
                 }
             }
 
+            return false;
+        }
+        
+        public static bool TrianglesHaveTwoSharedVertices(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
+        {
+            int sharedVertices = 0;
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
+            {
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
+                {
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
+                    {
+                        sharedVertices++;
+                        break;
+                    }
+                }
+            }
+
+            if (sharedVertices == 2)
+            {
+                return true;
+            }
             return false;
         }
 
