@@ -29,6 +29,8 @@ namespace GeometryHelpers
             Vector2 centroid = new Vector2(centroidX, centroidY);
             return centroid;
         }
+        
+        
 
         public static Circle GetTriangleCircumCircle(this Triangle2DPosition triangle2DPosition)
         {
@@ -114,10 +116,11 @@ namespace GeometryHelpers
             float y = 0;
             bool hasY = false;
             bool hasX = false;
-            if (_secondPoint.x != _firstPoint.x)
+            if (Math.Abs(_secondPoint.x - _firstPoint.x) > 0)
             {
                 a = (_secondPoint.y - _firstPoint.y) / (_secondPoint.x - _firstPoint.x);
-                if (a != 0)
+                  
+                if (a > 0 || a<0)
                 {
                     b = -(a * _firstPoint.x - _firstPoint.y);
                 }
@@ -143,7 +146,7 @@ namespace GeometryHelpers
             Vector2 edgeDirection = _triangle2DPosition.Vertices[_secondVertexIndex] -
                                     _triangle2DPosition.Vertices[_firstvertexIndex];
             Vector2 midEdgePoint = _triangle2DPosition.Vertices[_firstvertexIndex] + (edgeDirection / 2);
-            Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x).normalized * 1000;
+            Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x);
             return midEdgePoint.GetLinearEquationOfLine(secondPoint);
         }
 
@@ -196,14 +199,43 @@ namespace GeometryHelpers
             return new Triangle2DPosition(vertexA, vertexB, vertexC);
         }
 
-        public static Segment[] GetSegmentsInTriangles(this Triangle2DPosition triangle2DPosition)
+        public static Segment[] GetSegmentsInTriangles(this Triangle2DPosition _triangle2DPosition)
         {
             return new Segment[3]
             {
-                new(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]),
-                new(triangle2DPosition.Vertices[1], triangle2DPosition.Vertices[2]),
-                new(triangle2DPosition.Vertices[2], triangle2DPosition.Vertices[0])
+                new(_triangle2DPosition.Vertices[0], _triangle2DPosition.Vertices[1]),
+                new(_triangle2DPosition.Vertices[1], _triangle2DPosition.Vertices[2]),
+                new(_triangle2DPosition.Vertices[2], _triangle2DPosition.Vertices[0])
             };
+        }
+
+        public static bool CheckIfPointIsInTriangle(this Triangle2DPosition _triangle2DPosition, Vector2 _point)
+        {
+            float area = GetArea(_triangle2DPosition);
+            float sumOfSubTriangleArea = 0;
+
+            Vector2[] vertices = _triangle2DPosition.Vertices;
+            Triangle2DPosition[] subTriangles = new Triangle2DPosition[]
+            {
+                new (_point,vertices[0],vertices[1]),
+                new (_point,vertices[0],vertices[2]),
+                new (_point,vertices[1],vertices[2])
+            };
+            for (int i = 0; i < subTriangles.Length; i++)
+            {
+                sumOfSubTriangleArea+= subTriangles[i].GetArea();
+            }
+            if (Math.Abs(sumOfSubTriangleArea - area) == 0)
+            {
+                return true;
+            }
+            return false;
+            
+        }
+        public static float GetArea(this Triangle2DPosition triangle2DPosition)
+        {
+         return Vector3.Cross(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]).magnitude*0.5f;
+
         }
 
         public static bool TriangleHasEdge(this Triangle2DPosition triangle2DPosition, Segment _segment)
@@ -226,6 +258,22 @@ namespace GeometryHelpers
             }
 
             return false;
+        }
+        
+        public static int GetSharedVertices(this Segment _firstSegment, Segment _secondSegment)
+        {
+            int sharedVerticesCount = 0;
+            for (int j = 0; j < _firstSegment.Points.Length; j++)
+            {
+                for (int i = 0; i < _secondSegment.Points.Length; i++)
+                {
+                    if (_firstSegment.Points[j] == _secondSegment.Points[i])
+                    {
+                        sharedVerticesCount++;
+                    }
+                }
+            }
+            return sharedVerticesCount;
         }
 
         public static bool TrianglesHaveOneSharedVertex(this Triangle2DPosition triangle2DPositionA,

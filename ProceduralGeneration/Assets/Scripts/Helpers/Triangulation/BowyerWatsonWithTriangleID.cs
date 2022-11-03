@@ -40,19 +40,9 @@ namespace Triangulation
                 {
                     Vector2[] vertices = triangle.Key.Vertices;
                     bool hasTooLargeAngle = false;
-                    Vector2[] edgesVector = new []{vertices[1] - vertices[0],vertices[2] - vertices[1], vertices[0] - vertices[2] };
-                    float[] verticesAngle = new float[3];
-                    verticesAngle[0] = Vector2.Angle(-edgesVector[0], edgesVector[1]);
-                    verticesAngle[1] = Vector2.Angle(-edgesVector[1], edgesVector[2]);
-                    verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
-                    for (int i = 0; i < verticesAngle.Length; i++)
-                    {
-                        if (verticesAngle[i] > maxAngle)
-                        {
-                            hasTooLargeAngle = true;
-                            break; 
-                        }
-                    }
+
+                    hasTooLargeAngle = CheckAngle(vertices, maxAngle);
+                    Debug.Log(hasTooLargeAngle);
                     if (!hasTooLargeAngle)
                     {
                         triangles.Add(triangle.Key);

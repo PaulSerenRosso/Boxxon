@@ -586,7 +586,7 @@ MonoBehaviour:
   baseGridObjectPrefab: {fileID: 7194740519792397768, guid: 0db06f1d125030f44a39f9bfd64b5693,
     type: 3}
   startGridTransform: {fileID: 2013047737}
-  gridSize: {x: 5, y: 5}
+  gridSize: {x: 100, y: 100}
 --- !u!4 &997909265
 Transform:
   m_ObjectHideFlags: 0
@@ -820,7 +820,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1851231446}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5135c87e83c1c4144a17c6cd29c454ca, type: 3}
   m_Name: 
@@ -841,6 +841,8 @@ MonoBehaviour:
   - {x: 1, y: 3}
   superTriangleBaseEdgeOffset: 5
   maxAngleForTriangle: 120
+  minDistance: 1
+  maxDistance: 2
   tests: []
   circlesOfFinalTriangles: []
   drawFinalTriangles: 

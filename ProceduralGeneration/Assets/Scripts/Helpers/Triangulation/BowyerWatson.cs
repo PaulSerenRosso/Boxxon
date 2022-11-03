@@ -49,7 +49,9 @@ namespace Triangulation
             for (int i = 0; i < points.Length; i++)
             {
                 var trianglesChoosen = ChooseTriangles(i);
-                var polygon = CreatePolygon(trianglesChoosen);
+
+                var triangleWhichContainCurrentPoint = GetTriangleWithCurrentPoint(trianglesChoosen, i);
+                var polygon = CreatePolygon(trianglesChoosen, triangleWhichContainCurrentPoint);
                 RemoveChoosenTriangle(trianglesChoosen);
                 CreateNewTriangles(polygon, i);
             }
@@ -79,8 +81,48 @@ namespace Triangulation
             return trianglesChoosen;
         }
 
+        private Triangle2DPosition GetTriangleWithCurrentPoint(List<Triangle2DPosition> _trianglesChoosen, int _i)
+        {
+            for (int i = 0; i < _trianglesChoosen.Count; i++)
+            {
+                if (_trianglesChoosen[i].CheckIfPointIsInTriangle(points[_i]))
+                {
+                     return _trianglesChoosen[i];
+                }
+            }
+            throw new Exception("Triangles choosen List doesn't contain the triangle which contain the current point");
+        }
 
-        private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
+
+        private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
+        {
+            var polygon = CreatePolygonWithNoOneDuplication(_trianglesChoosen);
+            
+           int[] sharedVerticesCount = new int[polygon.Count];
+            
+            for (int i = polygon.Count-1; i > -1; i--)
+            {
+                for (int j = polygon.Count-1; j > -1; j--)
+                {
+                  sharedVerticesCount[i] += polygon[i].GetSharedVertices(polygon[j]);
+                }
+
+                if (sharedVerticesCount[i] != 2)
+                {
+                    polygon.RemoveAt(i);
+                }
+            }
+
+            
+
+
+            // check si les edges ont deux fois les memes
+            
+            // check si un points puis un points 
+            return polygon;
+        }
+
+        private List<Segment> CreatePolygonWithNoOneDuplication(List<Triangle2DPosition> _trianglesChoosen)
         {
             List<Segment> polygon = new List<Segment>();
             for (int j = 0; j < _trianglesChoosen.Count; j++)
@@ -122,7 +164,9 @@ namespace Triangulation
 
             return polygon;
         }
+
         
+
         private void RemoveChoosenTriangle(List<Triangle2DPosition> _trianglesChoosen)
         {
             for (int i = 0; i < _trianglesChoosen.Count; i++)
@@ -133,12 +177,15 @@ namespace Triangulation
 
         protected void CreateNewTriangles(List<Segment> _polygone, int i)
         {
+            
             for (int j = 0; j < _polygone.Count; j++)
             {
                 Triangle2DPosition newTriangle2DPosition =
                     new Triangle2DPosition(points[i], _polygone[j].Points[0], _polygone[j].Points[1]);
                 var triangleCircumCircle = newTriangle2DPosition.GetTriangleCircumCircle();
+              
                 trianglesWithCircumCircle.Add(newTriangle2DPosition, triangleCircumCircle);
+                
             }
         }
 
@@ -151,20 +198,7 @@ namespace Triangulation
                 {
                     Vector2[] vertices = triangle.Key.Vertices;
                     bool hasTooLargeAngle = false;
-                    Vector2[] edgesVector = new[]
-                        {vertices[1] - vertices[0], vertices[2] - vertices[1], vertices[0] - vertices[2]};
-                    float[] verticesAngle = new float[3];
-                    verticesAngle[0] = Vector2.Angle(-edgesVector[0], edgesVector[1]);
-                    verticesAngle[1] = Vector2.Angle(-edgesVector[1], edgesVector[2]);
-                    verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
-                    for (int i = 0; i < verticesAngle.Length; i++)
-                    {
-                        if (verticesAngle[i] > maxAngle)
-                        {
-                            hasTooLargeAngle = true;
-                            break;
-                        }
-                    }
+                    hasTooLargeAngle = CheckAngle(vertices, maxAngle);
 
                     if (!hasTooLargeAngle)
                     {
@@ -174,6 +208,27 @@ namespace Triangulation
             }
 
             return triangles;
+        }
+
+        protected bool CheckAngle(Vector2[] _vertices, float _maxAngle)
+        {
+            bool hasTooLargeAngle = false;
+            Vector2[] edgesVector = new[]
+                { _vertices[1] - _vertices[0], _vertices[2] - _vertices[1], _vertices[0] - _vertices[2] };
+            float[] verticesAngle = new float[3];
+            verticesAngle[0] = Vector2.Angle(-edgesVector[0], edgesVector[1]);
+            verticesAngle[1] = Vector2.Angle(-edgesVector[1], edgesVector[2]);
+            verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
+            for (int i = 0; i < verticesAngle.Length; i++)
+            {
+                if (verticesAngle[i] > _maxAngle)
+                {
+                    hasTooLargeAngle = true;
+                    break;
+                }
+            }
+
+            return hasTooLargeAngle;
         }
     }
 }

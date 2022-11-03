@@ -2,6 +2,7 @@ using System;
 using GeometryHelpers;
 using JetBrains.Annotations;
 using MeshGenerator;
+using PointGenerator;
 using Triangulation;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -14,11 +15,13 @@ namespace OrganicGrid
         [Header("Set in Editor")] [SerializeField]
         private Rect gridRect;
 
-        [SerializeField] private Vector2[] points;
+        [SerializeField] private Vector2[] points ;
 
         [SerializeField] private float superTriangleBaseEdgeOffset = 5;
         [SerializeField] private float maxAngleForTriangle;
 
+        [SerializeField] private float minDistance;
+        [SerializeField] private float maxDistance;
         [Header("Set in Playing")] 
         [SerializeField] private TriangulationTest[] tests;
         [SerializeField] private Circle[] circlesOfFinalTriangles;
@@ -30,8 +33,11 @@ namespace OrganicGrid
         private BowyerWatsonTest bowyerWatson;
         private Color[] colors;
 
+        
         private void Start()
         {
+           PoissonDiskSampling generator = new PoissonDiskSampling(gridRect.size,minDistance, maxDistance );
+           points = generator.GeneratePoints();
             bowyerWatson = new BowyerWatsonTest(gridRect, superTriangleBaseEdgeOffset,
                 points, maxAngleForTriangle);
             finalTriangles = bowyerWatson.Triangulate();
@@ -58,10 +64,11 @@ namespace OrganicGrid
 
         private void OnDrawGizmosSelected()
         {
-            if (Application.isPlaying)
+            if (Application.isPlaying && enabled)
             {
                 DrawSuperTriangle();
 
+                Debug.Log("test");
                 DrawFinalTriangles();
 
                 DrawEachIterationOfBowyerWatson();
