@@ -14,8 +14,8 @@ namespace Triangulation
         private TriangleID[] trianglesID;
         private List<Vector2> pointList = new List<Vector2>();
 
-        public BowyerWatsonWithTriangleID(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle) : base(
-            _rect, _superTriangleBaseEdgeOffset, _points, _maxAngle)
+        public BowyerWatsonWithTriangleID(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngleForFilteringFinalTriangles) : base(
+            _rect, _superTriangleBaseEdgeOffset, _points, _maxAngleForFilteringFinalTriangles)
         {
             pointList = _points.ToList();
         }
@@ -41,8 +41,7 @@ namespace Triangulation
                     Vector2[] vertices = triangle.Key.Vertices;
                     bool hasTooLargeAngle = false;
 
-                    hasTooLargeAngle = CheckAngle(vertices, maxAngle);
-                    Debug.Log(hasTooLargeAngle);
+                    hasTooLargeAngle = CheckAngle(vertices, maxAngleForFilteringFinalTriangles);
                     if (!hasTooLargeAngle)
                     {
                         triangles.Add(triangle.Key);
@@ -58,5 +57,7 @@ namespace Triangulation
             trianglesID = newTrianglesID.ToArray();
             return triangles;
         }
+
+      
     }
 }

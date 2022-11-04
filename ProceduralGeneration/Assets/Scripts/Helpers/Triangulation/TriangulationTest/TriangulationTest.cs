@@ -12,6 +12,8 @@ public class TriangulationTest
     public bool pointIsVisible;
     public bool currentTriangleAreVisible;
     public bool trianglesChoosenAreVisible; 
+    public bool triangleWhichContainCurrentPointIsVisible;
+    public bool filteredTrianglesChoosenAreVisible;
     public bool polygonIsVisible;
     public bool trianglesWithoutTrianglesChoosenAreVisible;
     public bool newTrianglesAreVisible;
@@ -23,6 +25,10 @@ public class TriangulationTest
     [HideInInspector] public List<Segment> polygon;
     [HideInInspector] public List<Triangle2DPosition> trianglesWithoutTrianglesChoosen;
     [HideInInspector] public List<Triangle2DPosition> newTriangles;
+    
+    [HideInInspector] public List<Triangle2DPosition> filteredTrianglesChoosen;
+    public Triangle2DPosition  triangleWhichContainCurrentPoint;
+    
 
     public TriangulationTest()
     {

@@ -68,7 +68,7 @@ namespace OrganicGrid
             {
                 DrawSuperTriangle();
 
-                Debug.Log("test");
+               
                 DrawFinalTriangles();
 
                 DrawEachIterationOfBowyerWatson();
@@ -102,19 +102,51 @@ namespace OrganicGrid
             {
                 var bowyerWatsonTest = bowyerWatsonTests[i];
                 DrawCurrentPoint(bowyerWatsonTest);
-
-                DrawPolygon(bowyerWatsonTest);
-
                 DrawCurrentTriangles(bowyerWatsonTest);
-
+                DrawTrianglesChoosen(bowyerWatsonTest);
+                DrawTriangleWhichContainCurrentPoint(bowyerWatsonTest);
+                DrawFilteredTrianglesChoosen(bowyerWatsonTest);
+                DrawPolygon(bowyerWatsonTest);
+                
+                DrawTrianglesWithoutTrianglesChoosen(bowyerWatsonTest);
                 DrawNewTriangles(bowyerWatsonTest);
 
-                DrawTrianglesChoosen(bowyerWatsonTest);
-
-                DrawTrianglesWithoutTrianglesChoosen(bowyerWatsonTest);
             }
         }
 
+        private void DrawFilteredTrianglesChoosen(TriangulationTest bowyerWatsonTest)
+        {
+            if (bowyerWatsonTest.filteredTrianglesChoosenAreVisible)
+            {
+                Gizmos.color = Color.cyan;
+                for (int j = 0; j < bowyerWatsonTest.filteredTrianglesChoosen.Count; j++)
+                {
+               
+                    Gizmos.DrawLine(bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[0],
+                        bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[1]);
+                    Gizmos.DrawLine(bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[1],
+                        bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[2]);
+                    Gizmos.DrawLine(bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[2],
+                        bowyerWatsonTest.filteredTrianglesChoosen[j].Vertices[0]);
+                }
+            }
+        }
+       
+
+        void DrawTriangleWhichContainCurrentPoint(TriangulationTest bowyerWatsonTest)
+        {
+            if (bowyerWatsonTest.triangleWhichContainCurrentPointIsVisible)
+            {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[0],
+                bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[1]);
+            Gizmos.DrawLine(bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[1],
+                bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[2]);
+            Gizmos.DrawLine(bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[2],
+                bowyerWatsonTest.triangleWhichContainCurrentPoint.Vertices[0]);
+                
+            }
+        }
         private void DrawTrianglesWithoutTrianglesChoosen(TriangulationTest bowyerWatsonTest)
         {
             if (bowyerWatsonTest.trianglesWithoutTrianglesChoosenAreVisible)

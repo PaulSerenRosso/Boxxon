@@ -26,5 +26,31 @@ namespace GeometryHelpers
             throw new Exception("Vertices count must be equal to 3");
          vertices = _vertices;
       }
+      public static bool operator == (Triangle2DPosition a, Triangle2DPosition b)
+      {
+         int sharedVertices = 0;
+         for (int i = 0; i < a.vertices.Length; i++)
+         {
+            for (int j = 0; j < b.vertices.Length; j++)
+            {
+               if (a.vertices[i] == b.vertices[j])
+               {
+                  sharedVertices++;
+               }
+            }
+         }
+
+         if (sharedVertices == 3)
+         {
+            return true;
+         }
+
+         return false;
+      }
+
+      public static bool operator !=(Triangle2DPosition a, Triangle2DPosition b)
+      {
+         return !(a == b);
+      }
    }
 }

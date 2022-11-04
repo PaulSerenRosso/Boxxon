@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using GeometryHelpers;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+
 
 namespace Triangulation
 {
@@ -57,12 +57,15 @@ namespace Triangulation
                 {
                     Tests[i].currentTriangles.Add(triangle.Key);
                 }
-
-                var trianglesChoosen = ChooseTriangles(i);
                 
-                var polygon = CreatePolygon(trianglesChoosen);
+                var trianglesChoosen = ChooseTriangles(i);
+                var triangleWhichContainCurrentPoint = GetTriangleWithCurrentPoint(trianglesChoosen, i);
+                var filteredTrianglesChoosen =
+                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint);
+                Tests[i].filteredTrianglesChoosen = filteredTrianglesChoosen;
+                var polygon = CreatePolygon(filteredTrianglesChoosen);
                 Tests[i].polygon = polygon;
-                RemoveChoosenTriangle(trianglesChoosen);
+                RemoveChoosenTriangle(filteredTrianglesChoosen);
                 Tests[i].trianglesWithoutTrianglesChoosen = new List<Triangle2DPosition>();
                 foreach (var triangle in trianglesWithCircumCircle)
                 {
@@ -103,8 +106,66 @@ namespace Triangulation
             return trianglesChoosen;
         }
 
+   private Triangle2DPosition GetTriangleWithCurrentPoint(List<Triangle2DPosition> _trianglesChoosen, int _i)
+        {
+        
+            for (int i = 0; i < _trianglesChoosen.Count; i++)
+            {
+                if (_trianglesChoosen[i].CheckIfPointIsInTriangle(points[_i]))
+                {
+                    Tests[_i].triangleWhichContainCurrentPoint = _trianglesChoosen[i];
+                return _trianglesChoosen[i];
+                }
+                }
+            Tests[_i].triangleWhichContainCurrentPoint = _trianglesChoosen[0];
+            return _trianglesChoosen[0];
+        }
 
+        private List<Triangle2DPosition> FilteredTrianglesChoosen(List <Triangle2DPosition>_trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
+        {
+            Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
+            List<Triangle2DPosition> filteredTriangleChoosen = new List<Triangle2DPosition>();
+            List<Triangle2DPosition> trianglesWhichNeedToCheckNeighboursTriangles = new List<Triangle2DPosition>();
+            bool needNewIteration = true;
+            filteredTriangleChoosen.Add(currentTriangle);
+            trianglesWhichNeedToCheckNeighboursTriangles.Add(currentTriangle);
+            _trianglesChoosen.Remove(currentTriangle);
+            while (needNewIteration)
+            {
+                
+                for (int i = _trianglesChoosen.Count-1; i >-1 ; i--)
+                {
+                    
+                        if (currentTriangle.TrianglesHaveTwoSharedVertices(_trianglesChoosen[i]))
+                        {
+                            filteredTriangleChoosen.Add(_trianglesChoosen[i]);
+                            trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
+                            _trianglesChoosen.RemoveAt(i);
+                        }
+                    
+                }
+                trianglesWhichNeedToCheckNeighboursTriangles.Remove(currentTriangle);
+                if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
+                {
+                    needNewIteration = true;
+                    currentTriangle = trianglesWhichNeedToCheckNeighboursTriangles[0];
+                }
+                else
+                {
+                    needNewIteration = false;
+                }
+            }
+          
+           
+            return filteredTriangleChoosen;
+        }
         private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
+        {
+            var polygonWithNoOneDuplication = CreatePolygonWithNoOneDuplication(_trianglesChoosen);
+            return polygonWithNoOneDuplication;
+        }
+
+        private List<Segment> CreatePolygonWithNoOneDuplication(List<Triangle2DPosition> _trianglesChoosen)
         {
             List<Segment> polygon = new List<Segment>();
             for (int j = 0; j < _trianglesChoosen.Count; j++)
@@ -146,7 +207,6 @@ namespace Triangulation
 
             return polygon;
         }
-
 
         private void RemoveChoosenTriangle(List<Triangle2DPosition> _trianglesChoosen)
         {

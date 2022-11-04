@@ -225,7 +225,7 @@ namespace GeometryHelpers
             {
                 sumOfSubTriangleArea+= subTriangles[i].GetArea();
             }
-            if (Math.Abs(sumOfSubTriangleArea - area) == 0)
+            if (Math.Abs(sumOfSubTriangleArea - area) <0.000001)
             {
                 return true;
             }
@@ -234,7 +234,8 @@ namespace GeometryHelpers
         }
         public static float GetArea(this Triangle2DPosition triangle2DPosition)
         {
-         return Vector3.Cross(triangle2DPosition.Vertices[0], triangle2DPosition.Vertices[1]).magnitude*0.5f;
+         return Vector3.Cross(triangle2DPosition.Vertices[1]-triangle2DPosition.Vertices[0],
+             triangle2DPosition.Vertices[2]-triangle2DPosition.Vertices[0]).magnitude*0.5f;
 
         }
 
@@ -251,7 +252,6 @@ namespace GeometryHelpers
                     }
                 }
             }
-
             if (sharedVerticesCount == 2)
             {
                 return true;
@@ -300,24 +300,44 @@ namespace GeometryHelpers
         public static bool TrianglesHaveTwoSharedVertices(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
         {
-            int sharedVertices = 0;
+            int sharedVerticesCount = 0;
             for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
             {
                 for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
                 {
                     if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
                     {
-                        sharedVertices++;
+                        sharedVerticesCount++;
                         break;
                     }
                 }
             }
 
-            if (sharedVertices == 2)
+            if (sharedVerticesCount == 2)
             {
                 return true;
             }
             return false;
+        }
+        
+        public static List<Vector2> GetSharedVertices(this Triangle2DPosition triangle2DPositionA,
+            Triangle2DPosition triangle2DPositionB)
+        {
+            List<Vector2> sharedVertices = new List<Vector2>();
+            for (int i = 0; i < triangle2DPositionA.Vertices.Length; i++)
+            {
+                for (int j = 0; j < triangle2DPositionB.Vertices.Length; j++)
+                {
+                    if (triangle2DPositionA.Vertices[i] == triangle2DPositionB.Vertices[j])
+                    {
+                        sharedVertices.Add(triangle2DPositionA.Vertices[i]);
+                        break;
+                    }
+                }
+            }
+            return sharedVertices;
+
+
         }
 
         public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA,

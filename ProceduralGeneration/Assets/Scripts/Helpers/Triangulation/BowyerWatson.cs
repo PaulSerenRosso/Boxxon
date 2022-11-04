@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AlgebraHelpers;
 using GeometryHelpers;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+
 
 namespace Triangulation
 {
@@ -16,17 +19,19 @@ namespace Triangulation
         public Triangle2DPosition superTriangle2DPosition;
         // aléatoire retirer les angles trop optu
 
-        protected float maxAngle = 0;
+        protected float maxAngleForFilteringFinalTriangles = 0;
 
-        public Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle =
+        protected Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle =
             new Dictionary<Triangle2DPosition, Circle>();
+
 
         protected private Vector2[] points;
 
-        public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle)
+        public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points,
+            float _maxAngleForFilteringFinalTriangles)
         {
             rect = _rect;
-            maxAngle = _maxAngle;
+            maxAngleForFilteringFinalTriangles = _maxAngleForFilteringFinalTriangles;
             superTriangleBaseEdgeOffset = _superTriangleBaseEdgeOffset;
             points = _points;
             superTriangle2DPosition = GeometryHelper.GetTriangleWitchInscribesRect(_rect, superTriangleBaseEdgeOffset);
@@ -49,12 +54,11 @@ namespace Triangulation
             for (int i = 0; i < points.Length; i++)
             {
                 var trianglesChoosen = ChooseTriangles(i);
-
                 var triangleWhichContainCurrentPoint = GetTriangleWithCurrentPoint(trianglesChoosen, i);
                 var filteredTrianglesChoosen =
-                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint);
+                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint, i);
                 var polygon = CreatePolygon(filteredTrianglesChoosen);
-                RemoveChoosenTriangle(trianglesChoosen);
+                RemoveChoosenTriangle(filteredTrianglesChoosen);
                 CreateNewTriangles(polygon, i);
             }
 
@@ -89,30 +93,112 @@ namespace Triangulation
             {
                 if (_trianglesChoosen[i].CheckIfPointIsInTriangle(points[_i]))
                 {
-                     return _trianglesChoosen[i];
+                    return _trianglesChoosen[i];
                 }
             }
-            throw new Exception("Triangles choosen List doesn't contain the triangle which contain the current point");
+
+            return _trianglesChoosen[0];
         }
 
-        private List<Triangle2DPosition> FilteredTrianglesChoosen(List <Triangle2DPosition>_trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
+        private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
+            Triangle2DPosition _triangleWhichContainCurrentPoint, int _i)
         {
             Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
             List<Triangle2DPosition> filteredTriangleChoosen = new List<Triangle2DPosition>();
             List<Triangle2DPosition> trianglesWhichNeedToCheckNeighboursTriangles = new List<Triangle2DPosition>();
             bool needNewIteration = true;
+            filteredTriangleChoosen.Add(currentTriangle);
             trianglesWhichNeedToCheckNeighboursTriangles.Add(currentTriangle);
+            _trianglesChoosen.Remove(currentTriangle);
             while (needNewIteration)
             {
-                for (int i = _trianglesChoosen.Count-1; i >-1 ; i--)
+                for (int i = _trianglesChoosen.Count - 1; i > -1; i--)
                 {
-                    if (currentTriangle.TrianglesHaveTwoSharedVertices(_trianglesChoosen[i]))
+                    List<Vector2> sharedVertices =
+                        currentTriangle.GetSharedVertices(_trianglesChoosen[i]);
+                    if (sharedVertices.Count == 2)
                     {
-                        filteredTriangleChoosen.Add(_trianglesChoosen[i]);
-                        trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
-                        _trianglesChoosen.RemoveAt(i);
+                     ;
+                        List<float> sinusOfClampAngles = new List<float>();
+                        List<float> cosOfClampAngles = new List<float>();
+                        for (int j = 0; j < 2; j++)
+                        {
+                            Vector2 direction = (sharedVertices[j] - points[_i]).normalized;
+                            float angle = Mathf.Atan2(direction.y, direction.x);
+                            sinusOfClampAngles.Add(Mathf.Sin(angle));
+                            cosOfClampAngles.Add(Mathf.Cos(angle));
+                        }
+                        
+                        
+
+                        Vector2 oppositeVertex = Vector2.zero;
+                        for (int j = 0; j < _trianglesChoosen[i].Vertices.Length; j++)
+                        {
+                            if (_trianglesChoosen[i].Vertices[j] != sharedVertices[0]
+                                && _trianglesChoosen[i].Vertices[j] != sharedVertices[1])
+                            {
+                                oppositeVertex = _trianglesChoosen[i].Vertices[j];
+                                break;
+                            }
+                        }
+
+                        Vector2 directionOppositeAngleToCurrentPoint = (oppositeVertex - points[_i]).normalized;
+                        float oppositeAngleToCurrentPoint =
+                            Mathf.Atan2(directionOppositeAngleToCurrentPoint.y, directionOppositeAngleToCurrentPoint.x);
+                        float sinusOfDirectionOppositeAngleToCurrentPoint =
+                            Mathf.Sin(oppositeAngleToCurrentPoint);
+                        float cosOfDirectionOppositeAngleToCurrentPoint =
+                            Mathf.Cos(oppositeAngleToCurrentPoint);
+                        
+                        bool sinusIsValid = false;
+                        if (Math.Abs(sinusOfClampAngles[0] - sinusOfClampAngles[1]) < 0.00001f)
+                        {
+                            if (sinusOfClampAngles[0] < 0)
+                            {
+                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint < sinusOfClampAngles[0];
+                            }
+                            else if (sinusOfClampAngles[0] > 0)
+                            {
+                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint > sinusOfClampAngles[0];
+                            }
+                        }
+                            else
+                            {
+                                sinusOfClampAngles.Sort();
+                           
+                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint.IsClamp(
+                                    sinusOfClampAngles[0],
+                                    sinusOfClampAngles[1]);
+                            }
+
+                        bool cosIsValid = false;
+                        if (Math.Abs(cosOfClampAngles[0] - cosOfClampAngles[1]) < 0.00001f)
+                        {
+                            if (cosOfClampAngles[0] < 0)
+                            {
+                                cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint < cosOfClampAngles[0];
+                            }
+                            else if (cosOfClampAngles[0] > 0)
+                            {
+                                cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint > cosOfClampAngles[0];
+                            }
+                        }
+                        else
+                        {
+                            cosOfClampAngles.Sort();
+                            cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint.IsClamp(cosOfClampAngles[0],
+                                cosOfClampAngles[1]);
+                        }
+                        
+                        if (cosIsValid && sinusIsValid)
+                        {
+                            filteredTriangleChoosen.Add(_trianglesChoosen[i]);
+                            trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
+                            _trianglesChoosen.RemoveAt(i);
+                        }
                     }
                 }
+
                 trianglesWhichNeedToCheckNeighboursTriangles.Remove(currentTriangle);
                 if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
                 {
@@ -124,6 +210,8 @@ namespace Triangulation
                     needNewIteration = false;
                 }
             }
+
+
             return filteredTriangleChoosen;
         }
 
@@ -176,8 +264,6 @@ namespace Triangulation
             return polygon;
         }
 
-        
-
         private void RemoveChoosenTriangle(List<Triangle2DPosition> _trianglesChoosen)
         {
             for (int i = 0; i < _trianglesChoosen.Count; i++)
@@ -188,15 +274,12 @@ namespace Triangulation
 
         protected void CreateNewTriangles(List<Segment> _polygone, int i)
         {
-            
             for (int j = 0; j < _polygone.Count; j++)
             {
                 Triangle2DPosition newTriangle2DPosition =
                     new Triangle2DPosition(points[i], _polygone[j].Points[0], _polygone[j].Points[1]);
                 var triangleCircumCircle = newTriangle2DPosition.GetTriangleCircumCircle();
-              
                 trianglesWithCircumCircle.Add(newTriangle2DPosition, triangleCircumCircle);
-                
             }
         }
 
@@ -209,7 +292,7 @@ namespace Triangulation
                 {
                     Vector2[] vertices = triangle.Key.Vertices;
                     bool hasTooLargeAngle = false;
-                    hasTooLargeAngle = CheckAngle(vertices, maxAngle);
+                    hasTooLargeAngle = CheckAngle(vertices, maxAngleForFilteringFinalTriangles);
 
                     if (!hasTooLargeAngle)
                     {
