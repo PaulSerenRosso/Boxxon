@@ -5,7 +5,7 @@ using System.Linq;
 using AlgebraHelpers;
 using GeometryHelpers;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+
 
 
 namespace Triangulation
@@ -25,15 +25,20 @@ namespace Triangulation
             new Dictionary<Triangle2DPosition, Circle>();
 
 
+
         protected private Vector2[] points;
 
         public BowyerWatson(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points,
             float _maxAngleForFilteringFinalTriangles)
         {
-            rect = _rect;
+
+            rect = new Rect(_rect.size*2 / 2, _rect.size*2);
+            
+            
             maxAngleForFilteringFinalTriangles = _maxAngleForFilteringFinalTriangles;
             superTriangleBaseEdgeOffset = _superTriangleBaseEdgeOffset;
             points = _points;
+            
             superTriangle2DPosition = GeometryHelper.GetTriangleWitchInscribesRect(_rect, superTriangleBaseEdgeOffset);
         }
 
@@ -58,8 +63,8 @@ namespace Triangulation
                 var filteredTrianglesChoosen =
                     FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint, i);
                 var polygon = CreatePolygon(filteredTrianglesChoosen);
-                RemoveChoosenTriangle(filteredTrianglesChoosen);
                 CreateNewTriangles(polygon, i);
+                RemoveChoosenTriangle(filteredTrianglesChoosen);
             }
 
             var triangles = FilterTriangles();
@@ -89,18 +94,29 @@ namespace Triangulation
 
         private Triangle2DPosition GetTriangleWithCurrentPoint(List<Triangle2DPosition> _trianglesChoosen, int _i)
         {
+            float[] subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint = new float[_trianglesChoosen.Count];
+            int minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex = 0; 
             for (int i = 0; i < _trianglesChoosen.Count; i++)
             {
-                if (_trianglesChoosen[i].CheckIfPointIsInTriangle(points[_i]))
-                {
-                    return _trianglesChoosen[i];
-                }
+                subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint[i] = _trianglesChoosen[i]
+                    .GetSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPoint(points[_i]);
             }
 
-            return _trianglesChoosen[0];
+            minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex = 0;
+            for (int j = 1; j < subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint.Length; j++)
+                {
+                    if (subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint
+                            [minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex] >
+                        subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint[j])
+                    {
+                        minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex =
+                         j;
+                    }
+                }
+            return _trianglesChoosen[minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex];
         }
 
-        private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
+                       private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
             Triangle2DPosition _triangleWhichContainCurrentPoint, int _i)
         {
             Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
@@ -116,81 +132,103 @@ namespace Triangulation
                 {
                     List<Vector2> sharedVertices =
                         currentTriangle.GetSharedVertices(_trianglesChoosen[i]);
+                    
                     if (sharedVertices.Count == 2)
                     {
                      ;
-                        List<float> sinusOfClampAngles = new List<float>();
-                        List<float> cosOfClampAngles = new List<float>();
+                    float[] maxDirectionAngles = new float[2];
+                    bool maxAngleMustBeReverse = false;
                         for (int j = 0; j < 2; j++)
                         {
-                            Vector2 direction = (sharedVertices[j] - points[_i]).normalized;
-                            float angle = Mathf.Atan2(direction.y, direction.x);
-                            sinusOfClampAngles.Add(Mathf.Sin(angle));
-                            cosOfClampAngles.Add(Mathf.Cos(angle));
+                           Vector2 maxDirection = (sharedVertices[j] - points[_i]).normalized;
+                           maxDirectionAngles[j] = Mathf.Atan2(maxDirection.y, maxDirection.x);
+                           if (maxDirectionAngles[j] < 0)
+                           {
+                               maxDirectionAngles[j] = Mathf.PI * 2 + maxDirectionAngles[j];
+                           }
+                           
+                        }
+
+                        float maxAngle = maxDirectionAngles[0] - maxDirectionAngles[1];
+                    
+                        if (maxAngle > 0)
+                        {
+                            (maxDirectionAngles[0], maxDirectionAngles[1]) = (maxDirectionAngles[1], maxDirectionAngles[0]);
+                           
+                        }
+                        else
+                        {
+                            maxAngle = maxDirectionAngles[1] - maxDirectionAngles[0];
+                        }
+                        
+                        if  (maxAngle.IsClamp(Mathf.PI-0.01f,Mathf.PI+0.01f))
+                        {
+                            Vector2 oppositeVertexOfCurrentTriangle = Vector2.zero;
+                            for (int j = 0; j < currentTriangle.Vertices.Length; j++)
+                            {
+                                if (currentTriangle.Vertices[j] != sharedVertices[0]
+                                    && currentTriangle.Vertices[j] != sharedVertices[1])
+                                {
+                                    oppositeVertexOfCurrentTriangle = currentTriangle.Vertices[j];
+                                    break;
+                                }
+                                
+                            }
+                      
+                            Vector2 directionOppositeAngleOfCurrentTriangleToCurrentPoint = (oppositeVertexOfCurrentTriangle - points[_i]).normalized;
+                            float currentDirectionOppositeAngleOfCurrentTriangle = Mathf.Atan2( directionOppositeAngleOfCurrentTriangleToCurrentPoint.y,
+                                directionOppositeAngleOfCurrentTriangleToCurrentPoint.x);
+                            if (currentDirectionOppositeAngleOfCurrentTriangle.IsClamp(maxDirectionAngles[0],
+                                maxDirectionAngles[1]))
+                            {
+                                maxAngle = 2 * Mathf.PI - maxAngle;
+                                maxAngleMustBeReverse = true;
+                            }
+                        }
+                       else if (maxAngle >= Mathf.PI)
+                        {
+                            maxAngle = 2 * Mathf.PI - maxAngle;
+                            maxAngleMustBeReverse = true;
                         }
                         
                         
-
-                        Vector2 oppositeVertex = Vector2.zero;
+                        Vector2 oppositeVertexOfTriangleWhichBeInCheck = Vector2.zero;
                         for (int j = 0; j < _trianglesChoosen[i].Vertices.Length; j++)
                         {
                             if (_trianglesChoosen[i].Vertices[j] != sharedVertices[0]
                                 && _trianglesChoosen[i].Vertices[j] != sharedVertices[1])
                             {
-                                oppositeVertex = _trianglesChoosen[i].Vertices[j];
+                                oppositeVertexOfTriangleWhichBeInCheck = _trianglesChoosen[i].Vertices[j];
                                 break;
                             }
                         }
-
-                        Vector2 directionOppositeAngleToCurrentPoint = (oppositeVertex - points[_i]).normalized;
-                        float oppositeAngleToCurrentPoint =
-                            Mathf.Atan2(directionOppositeAngleToCurrentPoint.y, directionOppositeAngleToCurrentPoint.x);
-                        float sinusOfDirectionOppositeAngleToCurrentPoint =
-                            Mathf.Sin(oppositeAngleToCurrentPoint);
-                        float cosOfDirectionOppositeAngleToCurrentPoint =
-                            Mathf.Cos(oppositeAngleToCurrentPoint);
+                        Vector2 directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint = (oppositeVertexOfTriangleWhichBeInCheck - points[_i]).normalized;
+                      float currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.Atan2(directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.y,
+                            directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.x);
+                      if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint < 0)
+                      {
+                          currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.PI * 2 + currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint;
+                      }
+                    
+                     bool currentDirectionAngleIsValided = false;
+                      if (maxAngleMustBeReverse)
+                      {
+                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(0, maxDirectionAngles[0]) ||
+                              currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[1], Mathf.PI * 2))
+                          {
+                              currentDirectionAngleIsValided = true;
+                          }
+                      }
+                      else
+                      {
+                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[0], maxDirectionAngles[1]))
+                          {
+                              currentDirectionAngleIsValided = true;
+                                  
+                          }
+                      }
                         
-                        bool sinusIsValid = false;
-                        if (Math.Abs(sinusOfClampAngles[0] - sinusOfClampAngles[1]) < 0.00001f)
-                        {
-                            if (sinusOfClampAngles[0] < 0)
-                            {
-                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint < sinusOfClampAngles[0];
-                            }
-                            else if (sinusOfClampAngles[0] > 0)
-                            {
-                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint > sinusOfClampAngles[0];
-                            }
-                        }
-                            else
-                            {
-                                sinusOfClampAngles.Sort();
-                           
-                                sinusIsValid = sinusOfDirectionOppositeAngleToCurrentPoint.IsClamp(
-                                    sinusOfClampAngles[0],
-                                    sinusOfClampAngles[1]);
-                            }
-
-                        bool cosIsValid = false;
-                        if (Math.Abs(cosOfClampAngles[0] - cosOfClampAngles[1]) < 0.00001f)
-                        {
-                            if (cosOfClampAngles[0] < 0)
-                            {
-                                cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint < cosOfClampAngles[0];
-                            }
-                            else if (cosOfClampAngles[0] > 0)
-                            {
-                                cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint > cosOfClampAngles[0];
-                            }
-                        }
-                        else
-                        {
-                            cosOfClampAngles.Sort();
-                            cosIsValid = cosOfDirectionOppositeAngleToCurrentPoint.IsClamp(cosOfClampAngles[0],
-                                cosOfClampAngles[1]);
-                        }
-                        
-                        if (cosIsValid && sinusIsValid)
+                        if (currentDirectionAngleIsValided)
                         {
                             filteredTriangleChoosen.Add(_trianglesChoosen[i]);
                             trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);

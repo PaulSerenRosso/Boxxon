@@ -64,6 +64,7 @@ namespace MeshGenerator
             var pointA = points[trianglesID[i].A];
             vertexA.Position = pointA;
             vertexA.TexCoord0 = new float2(0, 0);
+            vertexA.Normal = new float3(0, 1, 0);
             var indexA = i * 3;
             _trianglesAndVertices.SetVertex(indexA, vertexA);
 
@@ -71,6 +72,7 @@ namespace MeshGenerator
             var pointB = points[trianglesID[i].B];
             vertexB.Position = pointB;
             vertexB.TexCoord0 = new float2(1, 0);
+            vertexB.Normal = new float3(0, 1, 0);
             
             var indexB = i * 3+1;
             _trianglesAndVertices.SetVertex(indexB, vertexB);
@@ -79,6 +81,7 @@ namespace MeshGenerator
             var pointC = points[trianglesID[i].C];
             vertexC.Position = pointC;
             vertexC.TexCoord0 = new float2(0, 1);
+            vertexC.Normal = new float3(0, 1, 0);
             var indexC = i * 3+2;
             _trianglesAndVertices.SetVertex(indexC, vertexC);
             

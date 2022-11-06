@@ -15,7 +15,7 @@ namespace OrganicGrid
         [Header("Set in Editor")] [SerializeField]
         private Rect gridRect;
 
-        [SerializeField] private Vector2[] points ;
+private Vector2[] points ;
 
         [SerializeField] private float superTriangleBaseEdgeOffset = 5;
         [SerializeField] private float maxAngleForTriangle;
@@ -24,10 +24,10 @@ namespace OrganicGrid
         [SerializeField] private float maxDistance;
         [Header("Set in Playing")] 
         [SerializeField] private TriangulationTest[] tests;
-        [SerializeField] private Circle[] circlesOfFinalTriangles;
-        [SerializeField] private bool[] drawFinalTriangles;
-        [SerializeField] private bool drawSuperTriangle;
-        [SerializeField] private bool[] seeCircum;
+    private Circle[] circlesOfFinalTriangles;
+       private bool[] drawFinalTriangles;
+  private bool drawSuperTriangle;
+      private bool[] seeCircum;
         
         private Triangle2DPosition[] finalTriangles;
         private BowyerWatsonTest bowyerWatson;

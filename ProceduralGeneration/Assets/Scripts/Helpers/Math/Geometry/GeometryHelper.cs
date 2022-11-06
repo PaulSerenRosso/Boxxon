@@ -209,7 +209,7 @@ namespace GeometryHelpers
             };
         }
 
-        public static bool CheckIfPointIsInTriangle(this Triangle2DPosition _triangle2DPosition, Vector2 _point)
+        public static float GetSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPoint(this Triangle2DPosition _triangle2DPosition, Vector2 _point)
         {
             float area = GetArea(_triangle2DPosition);
             float sumOfSubTriangleArea = 0;
@@ -225,12 +225,9 @@ namespace GeometryHelpers
             {
                 sumOfSubTriangleArea+= subTriangles[i].GetArea();
             }
-            if (Math.Abs(sumOfSubTriangleArea - area) <0.000001)
-            {
-                return true;
-            }
-            return false;
-            
+            return Mathf.Abs(area - sumOfSubTriangleArea);
+                
+
         }
         public static float GetArea(this Triangle2DPosition triangle2DPosition)
         {

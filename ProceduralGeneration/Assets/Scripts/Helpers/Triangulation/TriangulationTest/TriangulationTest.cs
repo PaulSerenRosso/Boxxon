@@ -20,14 +20,16 @@ public class TriangulationTest
     [HideInInspector] public Vector2 point;
     [HideInInspector] public List<Triangle2DPosition> currentTriangles;
     public Dictionary<Triangle2DPosition, Circle> trianglesChoosenWithCircle;
+    [HideInInspector]
     public List<Triangle2DPosition> trianglesChoosen;
+    [HideInInspector]
     public List<Circle> circlesOfTrianglesChoosen;
     [HideInInspector] public List<Segment> polygon;
     [HideInInspector] public List<Triangle2DPosition> trianglesWithoutTrianglesChoosen;
     [HideInInspector] public List<Triangle2DPosition> newTriangles;
     
     [HideInInspector] public List<Triangle2DPosition> filteredTrianglesChoosen;
-    public Triangle2DPosition  triangleWhichContainCurrentPoint;
+    [HideInInspector] public Triangle2DPosition  triangleWhichContainCurrentPoint;
     
 
     public TriangulationTest()

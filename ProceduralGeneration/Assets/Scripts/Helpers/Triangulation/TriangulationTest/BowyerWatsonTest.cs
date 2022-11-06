@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AlgebraHelpers;
 using GeometryHelpers;
 using UnityEngine;
+
 
 
 namespace Triangulation
@@ -17,7 +19,7 @@ namespace Triangulation
         public Triangle2DPosition superTriangle2DPosition;
         // aléatoire retirer les angles trop optu
 
-        protected float maxAngle = 0;
+        protected float  maxAngleForFilteringFinalTriangles = 0;
 
         public Dictionary<Triangle2DPosition, Circle> trianglesWithCircumCircle =
             new Dictionary<Triangle2DPosition, Circle>();
@@ -28,7 +30,7 @@ namespace Triangulation
         public BowyerWatsonTest(Rect _rect, float _superTriangleBaseEdgeOffset, Vector2[] _points, float _maxAngle)
         {
             rect = _rect;
-            maxAngle = _maxAngle;
+            maxAngleForFilteringFinalTriangles = _maxAngle;
             superTriangleBaseEdgeOffset = _superTriangleBaseEdgeOffset;
             points = _points;
             superTriangle2DPosition = GeometryHelper.GetTriangleWitchInscribesRect(_rect, superTriangleBaseEdgeOffset);
@@ -61,7 +63,7 @@ namespace Triangulation
                 var trianglesChoosen = ChooseTriangles(i);
                 var triangleWhichContainCurrentPoint = GetTriangleWithCurrentPoint(trianglesChoosen, i);
                 var filteredTrianglesChoosen =
-                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint);
+                    FilteredTrianglesChoosen(trianglesChoosen, triangleWhichContainCurrentPoint, i);
                 Tests[i].filteredTrianglesChoosen = filteredTrianglesChoosen;
                 var polygon = CreatePolygon(filteredTrianglesChoosen);
                 Tests[i].polygon = polygon;
@@ -109,19 +111,30 @@ namespace Triangulation
    private Triangle2DPosition GetTriangleWithCurrentPoint(List<Triangle2DPosition> _trianglesChoosen, int _i)
         {
         
+            float[] subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint = new float[_trianglesChoosen.Count];
+            int minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex = 0; 
             for (int i = 0; i < _trianglesChoosen.Count; i++)
             {
-                if (_trianglesChoosen[i].CheckIfPointIsInTriangle(points[_i]))
+                subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint[i] = _trianglesChoosen[i]
+                    .GetSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPoint(points[_i]);
+            }
+
+            minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex = 0;
+            for (int j = 1; j < subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint.Length; j++)
+            {
+                if (subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint
+                        [minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex] >
+                    subtractsOfTriangleAreaAndSubTrianglesAreaComposedWithPoint[j])
                 {
-                    Tests[_i].triangleWhichContainCurrentPoint = _trianglesChoosen[i];
-                return _trianglesChoosen[i];
+                    minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex =
+                        j;
                 }
-                }
-            Tests[_i].triangleWhichContainCurrentPoint = _trianglesChoosen[0];
-            return _trianglesChoosen[0];
+            }
+            return _trianglesChoosen[minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex];
         }
 
-        private List<Triangle2DPosition> FilteredTrianglesChoosen(List <Triangle2DPosition>_trianglesChoosen, Triangle2DPosition _triangleWhichContainCurrentPoint)
+                          private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
+            Triangle2DPosition _triangleWhichContainCurrentPoint, int _i)
         {
             Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
             List<Triangle2DPosition> filteredTriangleChoosen = new List<Triangle2DPosition>();
@@ -132,18 +145,113 @@ namespace Triangulation
             _trianglesChoosen.Remove(currentTriangle);
             while (needNewIteration)
             {
-                
-                for (int i = _trianglesChoosen.Count-1; i >-1 ; i--)
+                for (int i = _trianglesChoosen.Count - 1; i > -1; i--)
                 {
+                    List<Vector2> sharedVertices =
+                        currentTriangle.GetSharedVertices(_trianglesChoosen[i]);
                     
-                        if (currentTriangle.TrianglesHaveTwoSharedVertices(_trianglesChoosen[i]))
+                    if (sharedVertices.Count == 2)
+                    {
+                     ;
+                    float[] maxDirectionAngles = new float[2];
+                    bool maxAngleMustBeReverse = false;
+                        for (int j = 0; j < 2; j++)
+                        {
+                           Vector2 maxDirection = (sharedVertices[j] - points[_i]).normalized;
+                           maxDirectionAngles[j] = Mathf.Atan2(maxDirection.y, maxDirection.x);
+                           if (maxDirectionAngles[j] < 0)
+                           {
+                               maxDirectionAngles[j] = Mathf.PI * 2 + maxDirectionAngles[j];
+                           }
+                           
+                        }
+
+                        float maxAngle = maxDirectionAngles[0] - maxDirectionAngles[1];
+                    
+                        if (maxAngle > 0)
+                        {
+                            (maxDirectionAngles[0], maxDirectionAngles[1]) = (maxDirectionAngles[1], maxDirectionAngles[0]);
+                           
+                        }
+                        else
+                        {
+                            maxAngle = maxDirectionAngles[1] - maxDirectionAngles[0];
+                        }
+                        
+                        if  (maxAngle.IsClamp(Mathf.PI-0.01f,Mathf.PI+0.01f))
+                        {
+                            Vector2 oppositeVertexOfCurrentTriangle = Vector2.zero;
+                            for (int j = 0; j < currentTriangle.Vertices.Length; j++)
+                            {
+                                if (currentTriangle.Vertices[j] != sharedVertices[0]
+                                    && currentTriangle.Vertices[j] != sharedVertices[1])
+                                {
+                                    oppositeVertexOfCurrentTriangle = currentTriangle.Vertices[j];
+                                    break;
+                                }
+                                
+                            }
+                      
+                            Vector2 directionOppositeAngleOfCurrentTriangleToCurrentPoint = (oppositeVertexOfCurrentTriangle - points[_i]).normalized;
+                            float currentDirectionOppositeAngleOfCurrentTriangle = Mathf.Atan2( directionOppositeAngleOfCurrentTriangleToCurrentPoint.y,
+                                directionOppositeAngleOfCurrentTriangleToCurrentPoint.x);
+                            if (currentDirectionOppositeAngleOfCurrentTriangle.IsClamp(maxDirectionAngles[0],
+                                maxDirectionAngles[1]))
+                            {
+                                maxAngle = 2 * Mathf.PI - maxAngle;
+                                maxAngleMustBeReverse = true;
+                            }
+                        }
+                       else if (maxAngle >= Mathf.PI)
+                        {
+                            maxAngle = 2 * Mathf.PI - maxAngle;
+                            maxAngleMustBeReverse = true;
+                        }
+                        
+                        
+                        Vector2 oppositeVertexOfTriangleWhichBeInCheck = Vector2.zero;
+                        for (int j = 0; j < _trianglesChoosen[i].Vertices.Length; j++)
+                        {
+                            if (_trianglesChoosen[i].Vertices[j] != sharedVertices[0]
+                                && _trianglesChoosen[i].Vertices[j] != sharedVertices[1])
+                            {
+                                oppositeVertexOfTriangleWhichBeInCheck = _trianglesChoosen[i].Vertices[j];
+                                break;
+                            }
+                        }
+                        Vector2 directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint = (oppositeVertexOfTriangleWhichBeInCheck - points[_i]).normalized;
+                      float currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.Atan2(directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.y,
+                            directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.x);
+                      if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint < 0)
+                      {
+                          currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.PI * 2 + currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint;
+                      }
+                    
+                     bool currentDirectionAngleIsValided = false;
+                      if (maxAngleMustBeReverse)
+                      {
+                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(0, maxDirectionAngles[0]) ||
+                              currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[1], Mathf.PI * 2))
+                          {
+                              currentDirectionAngleIsValided = true;
+                          }
+                      }
+                      else
+                      {
+                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[0], maxDirectionAngles[1]))
+                          {
+                              currentDirectionAngleIsValided = true;
+                          }
+                      }
+                      if (currentDirectionAngleIsValided)
                         {
                             filteredTriangleChoosen.Add(_trianglesChoosen[i]);
                             trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
                             _trianglesChoosen.RemoveAt(i);
                         }
-                    
+                    }
                 }
+
                 trianglesWhichNeedToCheckNeighboursTriangles.Remove(currentTriangle);
                 if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
                 {
@@ -155,8 +263,8 @@ namespace Triangulation
                     needNewIteration = false;
                 }
             }
-          
-           
+
+
             return filteredTriangleChoosen;
         }
         private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
@@ -246,7 +354,7 @@ namespace Triangulation
                     verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
                     for (int i = 0; i < verticesAngle.Length; i++)
                     {
-                        if (verticesAngle[i] > maxAngle)
+                        if (verticesAngle[i] > maxAngleForFilteringFinalTriangles)
                         {
                             hasTooLargeAngle = true;
                             break;
@@ -261,6 +369,26 @@ namespace Triangulation
             }
 
             return triangles;
+        }
+        protected bool CheckAngle(Vector2[] _vertices, float _maxAngle)
+        {
+            bool hasTooLargeAngle = false;
+            Vector2[] edgesVector = new[]
+                { _vertices[1] - _vertices[0], _vertices[2] - _vertices[1], _vertices[0] - _vertices[2] };
+            float[] verticesAngle = new float[3];
+            verticesAngle[0] = Vector2.Angle(-edgesVector[0], edgesVector[1]);
+            verticesAngle[1] = Vector2.Angle(-edgesVector[1], edgesVector[2]);
+            verticesAngle[2] = Vector2.Angle(edgesVector[0], -edgesVector[2]);
+            for (int i = 0; i < verticesAngle.Length; i++)
+            {
+                if (verticesAngle[i] > _maxAngle)
+                {
+                    hasTooLargeAngle = true;
+                    break;
+                }
+            }
+
+            return hasTooLargeAngle;
         }
     }
 }
