@@ -270,7 +270,6 @@ namespace GeometryHelpers
                     }
                 }
             }
-     
             return sharedVerticesCount;
         }
 
@@ -333,10 +332,29 @@ namespace GeometryHelpers
                 }
             }
             return sharedVertices;
-
-
         }
 
+
+        public static float ConvertDirectionToSignedAngle(Vector2 _firstPoint, Vector2 _secondPoint)
+        {
+            Vector2 directionOppositeAngleOfCurrentTriangleToCurrentPoint =
+                (_secondPoint - _firstPoint).normalized;
+           return Mathf.Atan2(
+                directionOppositeAngleOfCurrentTriangleToCurrentPoint.y,
+                directionOppositeAngleOfCurrentTriangleToCurrentPoint.x);
+        }
+
+        public static float ConvertToSignedAngleToPositiveAngle(float _angle)
+        {
+            if (_angle < 0)
+            {
+                _angle =
+                    Mathf.PI*2+_angle;
+            }
+            return _angle;
+        }
+        
+     
         public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
         {
@@ -457,5 +475,21 @@ namespace GeometryHelpers
             quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
             return quads;
         }
+
+        public static Vector2 GetTheOppositeVertexToTheEdge(this Triangle2DPosition _triangle, Segment _edge)
+        {
+            Vector2 oppositeVertex= Vector2.zero;
+            for (int j = 0; j < _triangle.Vertices.Length; j++)
+            {
+                if (_triangle.Vertices[j] != _edge.Points[0]
+                    && _triangle.Vertices[j] != _edge.Points[1])
+                {
+                    oppositeVertex = _triangle.Vertices[j];
+                    break;
+                }
+            }
+            return oppositeVertex;
+        }
     }
+    
 }

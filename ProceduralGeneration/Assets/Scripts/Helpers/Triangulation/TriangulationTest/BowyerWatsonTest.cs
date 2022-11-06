@@ -133,7 +133,7 @@ namespace Triangulation
             return _trianglesChoosen[minSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPointIndex];
         }
 
-                          private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
+        private List<Triangle2DPosition> FilteredTrianglesChoosen(List<Triangle2DPosition> _trianglesChoosen,
             Triangle2DPosition _triangleWhichContainCurrentPoint, int _i)
         {
             Triangle2DPosition currentTriangle = _triangleWhichContainCurrentPoint;
@@ -143,107 +143,39 @@ namespace Triangulation
             filteredTriangleChoosen.Add(currentTriangle);
             trianglesWhichNeedToCheckNeighboursTriangles.Add(currentTriangle);
             _trianglesChoosen.Remove(currentTriangle);
+
             while (needNewIteration)
             {
                 for (int i = _trianglesChoosen.Count - 1; i > -1; i--)
                 {
                     List<Vector2> sharedVertices =
                         currentTriangle.GetSharedVertices(_trianglesChoosen[i]);
-                    
+
                     if (sharedVertices.Count == 2)
                     {
-                     ;
-                    float[] maxDirectionAngles = new float[2];
-                    bool maxAngleMustBeReverse = false;
-                        for (int j = 0; j < 2; j++)
-                        {
-                           Vector2 maxDirection = (sharedVertices[j] - points[_i]).normalized;
-                           maxDirectionAngles[j] = Mathf.Atan2(maxDirection.y, maxDirection.x);
-                           if (maxDirectionAngles[j] < 0)
-                           {
-                               maxDirectionAngles[j] = Mathf.PI * 2 + maxDirectionAngles[j];
-                           }
-                           
-                        }
+                        Segment sharedEdge = new Segment(sharedVertices[0], sharedVertices[1]);
+                        bool maxAngleMustBeReverse = false;
+                        var maxDirectionAngles = GetMaxDirectionAngles(_i, sharedVertices);
 
-                        float maxAngle = maxDirectionAngles[0] - maxDirectionAngles[1];
-                    
-                        if (maxAngle > 0)
-                        {
-                            (maxDirectionAngles[0], maxDirectionAngles[1]) = (maxDirectionAngles[1], maxDirectionAngles[0]);
-                           
-                        }
-                        else
-                        {
-                            maxAngle = maxDirectionAngles[1] - maxDirectionAngles[0];
-                        }
-                        
-                        if  (maxAngle.IsClamp(Mathf.PI-0.01f,Mathf.PI+0.01f))
-                        {
-                            Vector2 oppositeVertexOfCurrentTriangle = Vector2.zero;
-                            for (int j = 0; j < currentTriangle.Vertices.Length; j++)
-                            {
-                                if (currentTriangle.Vertices[j] != sharedVertices[0]
-                                    && currentTriangle.Vertices[j] != sharedVertices[1])
-                                {
-                                    oppositeVertexOfCurrentTriangle = currentTriangle.Vertices[j];
-                                    break;
-                                }
-                                
-                            }
-                      
-                            Vector2 directionOppositeAngleOfCurrentTriangleToCurrentPoint = (oppositeVertexOfCurrentTriangle - points[_i]).normalized;
-                            float currentDirectionOppositeAngleOfCurrentTriangle = Mathf.Atan2( directionOppositeAngleOfCurrentTriangleToCurrentPoint.y,
-                                directionOppositeAngleOfCurrentTriangleToCurrentPoint.x);
-                            if (currentDirectionOppositeAngleOfCurrentTriangle.IsClamp(maxDirectionAngles[0],
-                                maxDirectionAngles[1]))
-                            {
-                                maxAngle = 2 * Mathf.PI - maxAngle;
-                                maxAngleMustBeReverse = true;
-                            }
-                        }
-                       else if (maxAngle >= Mathf.PI)
-                        {
-                            maxAngle = 2 * Mathf.PI - maxAngle;
-                            maxAngleMustBeReverse = true;
-                        }
-                        
-                        
-                        Vector2 oppositeVertexOfTriangleWhichBeInCheck = Vector2.zero;
-                        for (int j = 0; j < _trianglesChoosen[i].Vertices.Length; j++)
-                        {
-                            if (_trianglesChoosen[i].Vertices[j] != sharedVertices[0]
-                                && _trianglesChoosen[i].Vertices[j] != sharedVertices[1])
-                            {
-                                oppositeVertexOfTriangleWhichBeInCheck = _trianglesChoosen[i].Vertices[j];
-                                break;
-                            }
-                        }
-                        Vector2 directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint = (oppositeVertexOfTriangleWhichBeInCheck - points[_i]).normalized;
-                      float currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.Atan2(directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.y,
-                            directionOppositeAngleOfTriangleWhichBeInCheckToCurrentPoint.x);
-                      if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint < 0)
-                      {
-                          currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint = Mathf.PI * 2 + currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint;
-                      }
-                    
-                     bool currentDirectionAngleIsValided = false;
-                      if (maxAngleMustBeReverse)
-                      {
-                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(0, maxDirectionAngles[0]) ||
-                              currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[1], Mathf.PI * 2))
-                          {
-                              currentDirectionAngleIsValided = true;
-                          }
-                      }
-                      else
-                      {
-                          if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(maxDirectionAngles[0], maxDirectionAngles[1]))
-                          {
-                              currentDirectionAngleIsValided = true;
-                          }
-                      }
-                      if (currentDirectionAngleIsValided)
+                        var maxAngle = CreateMaxAngle(maxDirectionAngles);
+
+                        maxAngleMustBeReverse = CheckMaxAngleMustBeReverse(_i, maxAngle, currentTriangle,
+                            sharedEdge, maxDirectionAngles);
+
+                        Vector2 oppositeVertexOfTriangleWhichBeInCheck =
+                            _trianglesChoosen[i].GetTheOppositeVertexToTheEdge(sharedEdge);
+                        float currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint =
+                            GeometryHelper.ConvertDirectionToSignedAngle(points[_i],
+                                oppositeVertexOfTriangleWhichBeInCheck);
+                        currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint =
+                            GeometryHelper.ConvertToSignedAngleToPositiveAngle(
+                                currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint);
+
+                        var currentDirectionAngleIsValided =
+                            CheckCurrentDirectionAngleIsValided(maxAngleMustBeReverse,
+                                currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint, maxDirectionAngles);
+
+                        if (currentDirectionAngleIsValided)
                         {
                             filteredTriangleChoosen.Add(_trianglesChoosen[i]);
                             trianglesWhichNeedToCheckNeighboursTriangles.Add(_trianglesChoosen[i]);
@@ -253,19 +185,117 @@ namespace Triangulation
                 }
 
                 trianglesWhichNeedToCheckNeighboursTriangles.Remove(currentTriangle);
-                if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
-                {
-                    needNewIteration = true;
-                    currentTriangle = trianglesWhichNeedToCheckNeighboursTriangles[0];
-                }
-                else
-                {
-                    needNewIteration = false;
-                }
+                needNewIteration =
+                    CheckIfNeedNewIteration(trianglesWhichNeedToCheckNeighboursTriangles, ref currentTriangle);
             }
 
 
             return filteredTriangleChoosen;
+        }
+
+        private float[] GetMaxDirectionAngles(int _i, List<Vector2> sharedVertices)
+        {
+            float[] maxDirectionAngles = new float[2];
+            for (int j = 0; j < 2; j++)
+            {
+                maxDirectionAngles[j] = GeometryHelper.ConvertDirectionToSignedAngle(points[_i], sharedVertices[j]);
+                maxDirectionAngles[j] = GeometryHelper.ConvertToSignedAngleToPositiveAngle(maxDirectionAngles[j]);
+            }
+
+            return maxDirectionAngles;
+        }
+
+        private float CreateMaxAngle(float[] maxDirectionAngles)
+        {
+            float maxAngle = maxDirectionAngles[0] - maxDirectionAngles[1];
+
+            if (maxAngle > 0)
+            {
+                (maxDirectionAngles[0], maxDirectionAngles[1]) =
+                    (maxDirectionAngles[1], maxDirectionAngles[0]);
+            }
+            else
+            {
+                maxAngle = maxDirectionAngles[1] - maxDirectionAngles[0];
+            }
+
+            return maxAngle;
+        }
+
+        private bool CheckMaxAngleMustBeReverse(int _i, float maxAngle, Triangle2DPosition currentTriangle,
+            Segment _sharedSegment,
+            float[] maxDirectionAngles)
+        {
+            bool maxAngleMustBeReverse = false;
+            if (maxAngle.IsClamp(Mathf.PI - 0.01f, Mathf.PI + 0.01f))
+            {
+                Vector2 oppositeVertexOfCurrentTriangle =
+                    currentTriangle.GetTheOppositeVertexToTheEdge(_sharedSegment);
+
+                float currentDirectionOppositeAngleOfCurrentTriangle = GeometryHelper.ConvertDirectionToSignedAngle(
+                    points[_i], oppositeVertexOfCurrentTriangle
+                );
+
+                currentDirectionOppositeAngleOfCurrentTriangle =
+                    GeometryHelper.ConvertToSignedAngleToPositiveAngle(
+                        currentDirectionOppositeAngleOfCurrentTriangle);
+
+                if (currentDirectionOppositeAngleOfCurrentTriangle.IsClamp(maxDirectionAngles[0],
+                    maxDirectionAngles[1]))
+                {
+                    maxAngleMustBeReverse = true;
+                }
+            }
+            else if (maxAngle >= Mathf.PI)
+            {
+                maxAngleMustBeReverse = true;
+            }
+
+            return maxAngleMustBeReverse;
+        }
+
+        private static bool CheckCurrentDirectionAngleIsValided(bool maxAngleMustBeReverse,
+            float currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint, float[] maxDirectionAngles)
+        {
+            bool currentDirectionAngleIsValided = false;
+            if (maxAngleMustBeReverse)
+            {
+                if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(0,
+                        maxDirectionAngles[0]) ||
+                    currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(
+                        maxDirectionAngles[1], Mathf.PI * 2))
+                {
+                    currentDirectionAngleIsValided = true;
+                }
+            }
+            else
+            {
+                if (currentDirectionAngleOfTriangleWhichBeInCheckToCurrentPoint.IsClamp(
+                    maxDirectionAngles[0], maxDirectionAngles[1]))
+                {
+                    currentDirectionAngleIsValided = true;
+                }
+            }
+
+            return currentDirectionAngleIsValided;
+        }
+
+
+        private bool CheckIfNeedNewIteration(List<Triangle2DPosition> trianglesWhichNeedToCheckNeighboursTriangles,
+            ref Triangle2DPosition currentTriangle)
+        {
+            bool needNewIteration;
+            if (trianglesWhichNeedToCheckNeighboursTriangles.Count != 0)
+            {
+                needNewIteration = true;
+                currentTriangle = trianglesWhichNeedToCheckNeighboursTriangles[0];
+            }
+            else
+            {
+                needNewIteration = false;
+            }
+
+            return needNewIteration;
         }
         private List<Segment> CreatePolygon(List<Triangle2DPosition> _trianglesChoosen)
         {

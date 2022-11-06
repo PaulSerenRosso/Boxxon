@@ -16,20 +16,28 @@ namespace OrganicGrid
         private OrganicGridCoordinates organicGridCoordinates;
         [SerializeField] private float maxAngleForTriangle;
         private Triangle2DPosition[] finalTriangles;
+        private TriangleID[] finalTrianglesId;
         
         public void LaunchOrganicGridTriangulation(OrganicGridCoordinates _organicGridCoordinates, Vector2[] _points,
-            Vector3[] _3Dpoints)
+            Vector3[] _3Dpoints, Bounds _gridBounds)
         {
             organicGridCoordinates = _organicGridCoordinates;
             bowyerWatson = new BowyerWatsonWithTriangleID(_organicGridCoordinates.GridRect, superTriangleBaseEdgeOffset,
                 _points, maxAngleForTriangle);
             finalTriangles = bowyerWatson.Triangulate();
-            TriangleID[] trianglesId = bowyerWatson.GetTriangleID();
-            objectTriangulation.LaunchObjectTriangulation(trianglesId, _3Dpoints,
-                new Bounds(
-                    _organicGridCoordinates.GridRect.center.ConvertTo3dSpace(CoordinateType.X, CoordinateType.Z,
-                        Vector2.zero),
-                    new Vector3(_organicGridCoordinates.GridRect.size.x, 2, _organicGridCoordinates.GridRect.size.y)));
+            finalTrianglesId = bowyerWatson.GetTriangleID();
+            objectTriangulation.LaunchObjectTriangulation(finalTrianglesId, _3Dpoints,_gridBounds
+         );
+        }
+
+      public  Triangle2DPosition[] GetFinalTriangles2DPosition()
+        {
+            return finalTriangles;
+        }
+
+        public TriangleID[] GetFinalTrianglesID()
+        {
+            return finalTrianglesId;
         }
     }
 }
