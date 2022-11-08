@@ -18,19 +18,20 @@ public class OrganicGridStepLauncher : MonoBehaviour
     private Bounds gridBounds;
     private void Start()
     {
+        organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
+            startGridTransform == null ? Vector3.zero : startGridTransform.position);
         gridBounds = new Bounds(
             organicGridCoordinates.GridRect.center.ConvertTo3dSpace(CoordinateType.X, CoordinateType.Z,
                 Vector2.zero),
             new Vector3(organicGridCoordinates.GridRect.size.x, 2, organicGridCoordinates.GridRect.size.y));
-        organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
-            startGridTransform == null ? Vector3.zero : startGridTransform.position);
         CreateBaseGridObjectPrefab();
         organicGridPointGeneration.LaunchOrganicGridPointGeneration(organicGridCoordinates);
         Vector3[] points3D = organicGridPointGeneration.GetPoint3DPosition();
-        organicGridTriangulation.LaunchOrganicGridTriangulation(organicGridCoordinates,organicGridPointGeneration.GetPoint2DPosition(),
+        var points = organicGridPointGeneration.GetPoint2DPosition();
+        organicGridTriangulation.LaunchOrganicGridTriangulation(organicGridCoordinates,points,
             points3D, gridBounds);
         organicGridTriangleMerger.LaunchOrganicGridTriangleMerger(
-            organicGridTriangulation.GetFinalTriangles2DPosition().ToList(), organicGridTriangulation.GetFinalTrianglesID(), points3D, gridBounds);
+            organicGridTriangulation.GetFinalTriangles2DPosition().ToList(), organicGridTriangulation.GetFinalTrianglesID(), points3D, points, gridBounds);
     }
 
     private void CreateBaseGridObjectPrefab()

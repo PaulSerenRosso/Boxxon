@@ -167,7 +167,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e77d08329409a145aeaf1e35235d657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxTriangleToMergeCountInPercentage: 0
+  maxTriangleToMergeCountInPercentage: 50
+  finalQuads: []
+  innerloopBatchCountForQuadGridJob: 30
+  innerloopBatchCountForTriangleGridJob: 30
+  triangleMergerTriangleGridPrefab: {fileID: 3866831133893494043, guid: e72aa52102d1d534f84eab790b6d5334,
+    type: 3}
+  triangleMergerQuadGridPrefab: {fileID: 3866831133893494043, guid: e62189f9ae516a2409d84e284199e87b,
+    type: 3}
+  quadIsVisible: 
+  drawGizmos: 1
+  minAngleForQuad: 40
+  maxAngleForQuad: 140
 --- !u!1 &329306275
 GameObject:
   m_ObjectHideFlags: 0
@@ -198,9 +209,60 @@ Transform:
   m_Children:
   - {fileID: 961775140}
   - {fileID: 1851231448}
+  - {fileID: 432992688}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &432992687
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 432992688}
+  - component: {fileID: 432992689}
+  m_Layer: 0
+  m_Name: Polygon Is Convex Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &432992688
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432992687}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 329306276}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &432992689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 432992687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e706193eee2ab3f40b716b2e9a8e4a95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vertices:
+  - {x: 18.48, y: 17.259453}
+  - {x: 18.740396, y: 18.873285}
+  - {x: 18.041828, y: 18.146023}
+  - {x: 17.381655, y: 17.381601}
+  isConvex: 1
 --- !u!1 &473404558
 GameObject:
   m_ObjectHideFlags: 0
@@ -632,7 +694,7 @@ MonoBehaviour:
   baseGridObjectPrefab: {fileID: 7194740519792397768, guid: 0db06f1d125030f44a39f9bfd64b5693,
     type: 3}
   startGridTransform: {fileID: 2013047737}
-  gridSize: {x: 100, y: 100}
+  gridSize: {x: 20, y: 20}
 --- !u!4 &997909265
 Transform:
   m_ObjectHideFlags: 0

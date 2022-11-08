@@ -29,8 +29,7 @@ namespace GeometryHelpers
             Vector2 centroid = new Vector2(centroidX, centroidY);
             return centroid;
         }
-        
-        
+
 
         public static Circle GetTriangleCircumCircle(this Triangle2DPosition triangle2DPosition)
         {
@@ -76,16 +75,16 @@ namespace GeometryHelpers
 
                 FlexMatrix directorCoefficientMatrix = new FlexMatrix(new FlexMatrixLine[]
                     {
-                        new FlexMatrixLine(new float[] {linearEquationOfMediators[0].a, -1}),
-                        new FlexMatrixLine(new float[] {linearEquationOfMediators[1].a, -1})
+                        new FlexMatrixLine(new float[] { linearEquationOfMediators[0].a, -1 }),
+                        new FlexMatrixLine(new float[] { linearEquationOfMediators[1].a, -1 })
                     }
                 );
                 directorCoefficientMatrix = directorCoefficientMatrix.Inverse();
 
                 FlexMatrix originOrderer = new FlexMatrix(new FlexMatrixLine[]
                     {
-                        new FlexMatrixLine(new float[] {linearEquationOfMediators[0].b}),
-                        new FlexMatrixLine(new float[] {linearEquationOfMediators[1].b})
+                        new FlexMatrixLine(new float[] { linearEquationOfMediators[0].b }),
+                        new FlexMatrixLine(new float[] { linearEquationOfMediators[1].b })
                     }
                 );
                 return directorCoefficientMatrix.Multiply(originOrderer);
@@ -104,7 +103,7 @@ namespace GeometryHelpers
                 linearEquationOfMediators.RemoveAt(yIsKnew);
                 return new Vector2((-linearEquationOfMediators[0].b + yValue) / linearEquationOfMediators[0].a, yValue);
             }
-            
+
             return new Vector2(linearEquationOfMediators[xIsKnew].x, linearEquationOfMediators[yIsKnew].y);
         }
 
@@ -119,8 +118,8 @@ namespace GeometryHelpers
             if (Math.Abs(_secondPoint.x - _firstPoint.x) > 0)
             {
                 a = (_secondPoint.y - _firstPoint.y) / (_secondPoint.x - _firstPoint.x);
-                  
-                if (a > 0 || a<0)
+
+                if (a > 0 || a < 0)
                 {
                     b = -(a * _firstPoint.x - _firstPoint.y);
                 }
@@ -209,7 +208,8 @@ namespace GeometryHelpers
             };
         }
 
-        public static float GetSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPoint(this Triangle2DPosition _triangle2DPosition, Vector2 _point)
+        public static float GetSubtractOfTriangleAreaAndSubTrianglesAreaComposedWithPoint(
+            this Triangle2DPosition _triangle2DPosition, Vector2 _point)
         {
             float area = GetArea(_triangle2DPosition);
             float sumOfSubTriangleArea = 0;
@@ -217,23 +217,22 @@ namespace GeometryHelpers
             Vector2[] vertices = _triangle2DPosition.Vertices;
             Triangle2DPosition[] subTriangles = new Triangle2DPosition[]
             {
-                new (_point,vertices[0],vertices[1]),
-                new (_point,vertices[0],vertices[2]),
-                new (_point,vertices[1],vertices[2])
+                new(_point, vertices[0], vertices[1]),
+                new(_point, vertices[0], vertices[2]),
+                new(_point, vertices[1], vertices[2])
             };
             for (int i = 0; i < subTriangles.Length; i++)
             {
-                sumOfSubTriangleArea+= subTriangles[i].GetArea();
+                sumOfSubTriangleArea += subTriangles[i].GetArea();
             }
-            return Mathf.Abs(area - sumOfSubTriangleArea);
-                
 
+            return Mathf.Abs(area - sumOfSubTriangleArea);
         }
+
         public static float GetArea(this Triangle2DPosition triangle2DPosition)
         {
-         return Vector3.Cross(triangle2DPosition.Vertices[1]-triangle2DPosition.Vertices[0],
-             triangle2DPosition.Vertices[2]-triangle2DPosition.Vertices[0]).magnitude*0.5f;
-
+            return Vector3.Cross(triangle2DPosition.Vertices[1] - triangle2DPosition.Vertices[0],
+                triangle2DPosition.Vertices[2] - triangle2DPosition.Vertices[0]).magnitude * 0.5f;
         }
 
         public static bool TriangleHasEdge(this Triangle2DPosition triangle2DPosition, Segment _segment)
@@ -249,6 +248,7 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             if (sharedVerticesCount == 2)
             {
                 return true;
@@ -256,7 +256,7 @@ namespace GeometryHelpers
 
             return false;
         }
-        
+
         public static int GetSharedVertices(this Segment _firstSegment, Segment _secondSegment)
         {
             int sharedVerticesCount = 0;
@@ -270,6 +270,7 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             return sharedVerticesCount;
         }
 
@@ -292,7 +293,7 @@ namespace GeometryHelpers
 
             return false;
         }
-        
+
         public static bool TrianglesHaveTwoSharedVertices(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
         {
@@ -313,9 +314,11 @@ namespace GeometryHelpers
             {
                 return true;
             }
+
+        
             return false;
         }
-        
+
         public static List<Vector2> GetSharedVertices(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
         {
@@ -331,15 +334,18 @@ namespace GeometryHelpers
                     }
                 }
             }
+
             return sharedVertices;
         }
+        
+     
 
 
         public static float ConvertDirectionToSignedAngle(Vector2 _firstPoint, Vector2 _secondPoint)
         {
             Vector2 directionOppositeAngleOfCurrentTriangleToCurrentPoint =
                 (_secondPoint - _firstPoint).normalized;
-           return Mathf.Atan2(
+            return Mathf.Atan2(
                 directionOppositeAngleOfCurrentTriangleToCurrentPoint.y,
                 directionOppositeAngleOfCurrentTriangleToCurrentPoint.x);
         }
@@ -349,12 +355,13 @@ namespace GeometryHelpers
             if (_angle < 0)
             {
                 _angle =
-                    Mathf.PI*2+_angle;
+                    Mathf.PI * 2 + _angle;
             }
+
             return _angle;
         }
-        
-     
+
+
         public static Vector2 GetCommunVertexOfTriangles(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
         {
@@ -375,27 +382,105 @@ namespace GeometryHelpers
         public static Quad CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB, Segment _communEdge)
         {
-            Triangle2DPosition[] triangles = new[] {triangle2DPositionA, triangle2DPositionB};
+            Triangle2DPosition[] triangles = new[] { triangle2DPositionA, triangle2DPositionB };
             //check pour 
             List<Vector2> unsharedPoints = new List<Vector2>();
-            for (int i = 0; i < _communEdge.Points.Length; i++)
-            {
+           
                 for (int j = 0; j < triangles.Length; j++)
                 {
                     for (int k = 0; k < triangles[j].Vertices.Length; k++)
                     {
-                        if (triangles[j].Vertices[k] != _communEdge.Points[i])
+                        if (triangles[j].Vertices[k] != _communEdge.Points[0] && triangles[j].Vertices[k] != _communEdge.Points[1])
                         {
                             unsharedPoints.Add(triangles[j].Vertices[k]);
                         }
                     }
                 }
+                if (unsharedPoints.Count != 2)
+                throw new Exception("Triangles have not one same edge or the current segment is not the good one");
+            return new Quad(_communEdge.Points[0],  unsharedPoints[0],_communEdge.Points[1], unsharedPoints[1]);
+        }
+        
+        public static bool IsCounterClockwise(Vector2 _a, Vector2 _b, Vector2 _c)
+        {
+            var value = (_b.x - _a.x) * (_c.y - _a.y) - (_c.x - _a.x) * (_b.y - _a.y);
+            if (value > 0)
+            {
+                return true;
             }
 
-            if (unsharedPoints.Count != 2)
-                throw new Exception("Triangles have not one same edge or the current segment is not the good one");
-            return new Quad(_communEdge.Points[0], _communEdge.Points[1], unsharedPoints[0], unsharedPoints[1]);
+            if (value == 0)
+            {
+                throw new Exception("a b and c are colinears");
+            }
+            return false;
         }
+
+        public static bool CheckIfPolygonIsConvex(Vector2[] _vertices)
+        {
+            if(_vertices.Length < 4)
+            {
+                throw new Exception("polygon must have more than 3 vertices");
+            }
+
+            bool isZNegative = false;
+       
+            Vector3 firstCrossProduct = Vector3.Cross(_vertices[_vertices.Length-1]-_vertices[0], _vertices[0]-_vertices[1]);
+       
+          
+            if (firstCrossProduct.z < 0)
+            {
+                isZNegative = true;
+            }
+          
+        
+            Vector3 lastCrossProduct = Vector3.Cross( _vertices[_vertices.Length - 1]-_vertices[0] ,
+                _vertices[_vertices.Length-1]-_vertices[_vertices.Length-2]);
+            
+            if ((lastCrossProduct.z > 0 && isZNegative )|| ( lastCrossProduct.z < 0 && !isZNegative))
+            {
+                return false;
+            }
+       
+            for (int i = 1; i < _vertices.Length-1; i++)
+            {
+                Vector3 currentCrossProduct = Vector3.Cross(_vertices[i]-_vertices[i-1] ,
+                    _vertices[i+1]-_vertices[i]);
+                if ((currentCrossProduct.z > 0 && isZNegative )||(currentCrossProduct.z < 0 && !isZNegative))
+                {
+                    return false;
+                }
+            }
+            
+            
+          
+            return true;
+        }
+
+        public static bool CheckIfPolygonConvexHasAllItsAnglesClamped(Vector2[] _vertices, float _minAngle, float _maxAngle)
+        { 
+            List<Vector2[]> directionsForAngle = new List<Vector2[]>();
+            
+            directionsForAngle.Add(new []{_vertices[_vertices.Length-1]-_vertices[0],  _vertices[1]-_vertices[0]});
+            directionsForAngle.Add(new []{_vertices[0]-_vertices[_vertices.Length-1],  _vertices[_vertices.Length-2]-_vertices[_vertices.Length-1]});
+            for (int i = 1; i < _vertices.Length-1; i++)
+            {
+               directionsForAngle.Add(new []{_vertices[i-1]-_vertices[i], _vertices[i+1]-_vertices[i]});
+            }
+            for (int i = 0; i <  directionsForAngle.Count; i++)
+            {
+                if(!Vector2.Angle(directionsForAngle[i][0], directionsForAngle[i][1]).IsClamp(_minAngle, _maxAngle))
+               {
+                   return false; 
+               }
+            }
+            return true;
+        }
+
+
+
+
+        
 
         public static bool TrianglesHaveOneSameEdge(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
@@ -478,7 +563,7 @@ namespace GeometryHelpers
 
         public static Vector2 GetTheOppositeVertexToTheEdge(this Triangle2DPosition _triangle, Segment _edge)
         {
-            Vector2 oppositeVertex= Vector2.zero;
+            Vector2 oppositeVertex = Vector2.zero;
             for (int j = 0; j < _triangle.Vertices.Length; j++)
             {
                 if (_triangle.Vertices[j] != _edge.Points[0]
@@ -488,8 +573,8 @@ namespace GeometryHelpers
                     break;
                 }
             }
+
             return oppositeVertex;
         }
     }
-    
 }

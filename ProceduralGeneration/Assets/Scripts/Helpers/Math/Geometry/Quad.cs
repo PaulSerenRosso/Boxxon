@@ -10,6 +10,7 @@ namespace GeometryHelpers
         {
             get => vertices;
         } 
+        [SerializeField]
         Vector2[] vertices;
         public Quad(Vector2 _vertexA, Vector2 _vertexB, Vector2 _vertexC, Vector2 _vertexD)
         {
