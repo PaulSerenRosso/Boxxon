@@ -64,7 +64,7 @@ public struct QuadGridMeshGenerator  : IMeshGenerator
             vertexA.Position = pointA;
             vertexA.TexCoord0 = new float2(0, 1);
             vertexA.Normal = new float3(0, 1, 0);
-            var indexA = i * 3;
+            var indexA = i * 4;
             _trianglesAndVertices.SetVertex(indexA, vertexA);
 
             Vertex vertexB = new Vertex();
@@ -72,8 +72,7 @@ public struct QuadGridMeshGenerator  : IMeshGenerator
             vertexB.Position = pointB;
             vertexB.TexCoord0 = new float2(1, 1);
             vertexB.Normal = new float3(0, 1, 0);
-            
-            var indexB = i * 3+1;
+            var indexB = i * 4+1;
             _trianglesAndVertices.SetVertex(indexB, vertexB);
             
             Vertex vertexC = new Vertex();
@@ -81,7 +80,7 @@ public struct QuadGridMeshGenerator  : IMeshGenerator
             vertexC.Position = pointC;
             vertexC.TexCoord0 = new float2(1, 0);
             vertexC.Normal = new float3(0, 1, 0);
-            var indexC = i * 3+2;
+            var indexC = i * 4+2;
             _trianglesAndVertices.SetVertex(indexC, vertexC);
             
             Vertex vertexD = new Vertex();
@@ -89,7 +88,7 @@ public struct QuadGridMeshGenerator  : IMeshGenerator
             vertexD.Position = pointD;
             vertexD.TexCoord0 = new float2(0, 0);
             vertexD.Normal = new float3(0, 1, 0);
-            var indexD = i * 3+2;
+            var indexD = i * 4+3;
             _trianglesAndVertices.SetVertex(indexD, vertexD);
             
             

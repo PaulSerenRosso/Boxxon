@@ -26,7 +26,7 @@ namespace OrganicGrid
                 _points, maxAngleForTriangle);
             finalTriangles = bowyerWatson.Triangulate();
             finalTrianglesId = bowyerWatson.GetTriangleID();
-            objectTriangulation.LaunchObjectTriangulation(finalTrianglesId, _3Dpoints,_gridBounds
+            objectTriangulation.LaunchObjectTriangulation(finalTrianglesId, _3Dpoints,_gridBounds,organicGridCoordinates.StartPosition
          );
         }
 

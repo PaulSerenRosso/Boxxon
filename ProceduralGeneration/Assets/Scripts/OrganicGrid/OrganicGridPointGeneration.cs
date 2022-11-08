@@ -21,11 +21,13 @@ namespace OrganicGrid
                     maxDistanceBetweenPoint);
             points = pointGenerator.GeneratePoints();
             pointObjectsPosition =
-                ConvertPointsToPointObjectsPosition(_organicGridCoordinates.StartPosition, _organicGridCoordinates);
-            pointObjectGenerator.LaunchPointObjectGenerator(_pointObjectPrefab, pointObjectsPosition);
+                ConvertPointsTo3DPoints( _organicGridCoordinates);
+            pointObjectGenerator.LaunchPointObjectGenerator(_pointObjectPrefab, pointObjectsPosition, 
+                new Vector3(_organicGridCoordinates.GridRect.size.x/2, 0,
+                    _organicGridCoordinates.GridRect.size.y/2)+_organicGridCoordinates.StartPosition);
         }
 
-        private Vector3[] ConvertPointsToPointObjectsPosition(Vector3 _organicGridPosition,
+        private Vector3[] ConvertPointsTo3DPoints(
             OrganicGridCoordinates _organicGridCoordinates)
         {
             Vector3[] pointObjectsPosition = new Vector3[points.Length];

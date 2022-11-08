@@ -11,11 +11,16 @@ using Random = UnityEngine.Random;
 
 public class OrganicGridTriangleMerger : MonoBehaviour
 {
+    [Header("Parameters For Triangle Merger")]
     [Range(0, 100)] [SerializeField] private float maxTriangleToMergeCountInPercentage;
+    [SerializeField] private float minAngleForQuad;
+    [SerializeField] private float maxAngleForQuad;
+    [SerializeField] private int innerloopBatchCountForQuadGridJob;
+    [SerializeField] private int innerloopBatchCountForTriangleGridJob;
+    [SerializeField] private GameObject triangleMergerTriangleGridPrefab;
+    [SerializeField] private GameObject triangleMergerQuadGridPrefab;
 
     private int maxTriangleToMergeCount = 0;
-
-    [SerializeField]
     private List<Quad> finalQuads = new List<Quad>();
     private List<Triangle2DPosition> finalTriangles = new List<Triangle2DPosition>();
     private List<QuadID> finalQuadsId = new List<QuadID>();
@@ -23,11 +28,9 @@ public class OrganicGridTriangleMerger : MonoBehaviour
     private List<Triangle2DPosition> triangle2DPositions;
     private List<Triangle2DPosition> currentTriangles;
     private TriangleID[] currentTrianglesID;
-    [SerializeField] private int innerloopBatchCountForQuadGridJob;
-    [SerializeField] private int innerloopBatchCountForTriangleGridJob;
 
-    [SerializeField] private GameObject triangleMergerTriangleGridPrefab;
-    [SerializeField] private GameObject triangleMergerQuadGridPrefab;
+    [Header("Parameters For Triangle Merger Gizmos ")]
+    [SerializeField] private bool drawGizmos;
     Color[] baseColors = new Color[]
     {
         Color.black, Color.blue, Color.cyan, Color.green, Color.red, Color.white, Color.yellow, Color.magenta,
@@ -39,14 +42,11 @@ public class OrganicGridTriangleMerger : MonoBehaviour
     private bool[] quadIsVisible;
 
     private Color[] colors;
-    [SerializeField] private bool drawGizmos;
     
-    [SerializeField] private float minAngleForQuad;
-    [SerializeField] private float maxAngleForQuad;
    
     private Vector2[] points;
     public void LaunchOrganicGridTriangleMerger(List<Triangle2DPosition> _triangles, TriangleID[] _trianglesId,
-        Vector3[] _points3D, Vector2[] _points, Bounds _gridBounds)
+        Vector3[] _points3D, Vector2[] _points, Bounds _gridBounds, Vector3 _offset)
     {
         SetUpTriangleMerger(_triangles, _trianglesId, _points);
         MergeTrianglesInQuads();
@@ -58,22 +58,22 @@ public class OrganicGridTriangleMerger : MonoBehaviour
             colors[i] = baseColors[Random.Range(0, baseColors.Length)];
             quadIsVisible[i] = false;
         }
-     GenerateTriangleMergerMeshes(_points3D, _gridBounds);
+     GenerateTriangleMergerMeshes(_points3D, _gridBounds, _offset);
     }
 
-    private void GenerateTriangleMergerMeshes(Vector3[] _points3D  ,Bounds _gridBounds)
+    private void GenerateTriangleMergerMeshes(Vector3[] _points3D  ,Bounds _gridBounds, Vector3 _offset)
     {
         Mesh quadGridMesh = MeshGeneratorHelper.GenerateQuadGridMesh(finalQuadsId.ToArray(), _points3D, _gridBounds,
             innerloopBatchCountForQuadGridJob);
         Mesh triangleGridMesh =
             MeshGeneratorHelper.GenerateTriangleGridMesh(finalTrianglesID.ToArray(), _points3D, _gridBounds,
                 innerloopBatchCountForTriangleGridJob);
-        GameObject triangleMergerTriangleGridObject = Instantiate(triangleMergerTriangleGridPrefab, _gridBounds.center,
+        GameObject triangleMergerTriangleGridObject = Instantiate(triangleMergerTriangleGridPrefab, _gridBounds.center+_offset,
             Quaternion.identity, transform);
         triangleMergerTriangleGridObject.GetComponent<MeshFilter>().mesh = triangleGridMesh;
 
         GameObject triangleMergerQuadGridObject =
-            Instantiate(triangleMergerQuadGridPrefab, _gridBounds.center, Quaternion.identity, transform);
+            Instantiate(triangleMergerQuadGridPrefab, _gridBounds.center+_offset, Quaternion.identity, transform);
         triangleMergerQuadGridObject.GetComponent<MeshFilter>().mesh = quadGridMesh;
     }
 
@@ -103,25 +103,18 @@ public class OrganicGridTriangleMerger : MonoBehaviour
             {
                 if (i == randIndex)
                     continue;
-              
-                List<Vector2> sharedVertices =  availableTriangles[i].GetSharedVertices( availableTriangles[randIndex]);
-                if (sharedVertices.Count == 2 )
-                {
-                    var communEdge = new Segment(sharedVertices[0], sharedVertices[1]);
-                    var candidateQuad = availableTriangles[i]
-                        .CreateQuadWithTwoTriangle(availableTriangles[randIndex], communEdge);
-                    if (GeometryHelper.CheckIfPolygonIsConvex(candidateQuad.Vertices))
-                    {
-                        if (GeometryHelper.CheckIfPolygonConvexHasAllItsAnglesClamped(candidateQuad.Vertices,
-                                minAngleForQuad, maxAngleForQuad))
-                        {
+
+                var checkIfTwoTriangleCanMerge = CheckIfTwoTriangleCanMerge(availableTriangles, randIndex, i);
+                if(checkIfTwoTriangleCanMerge.twoTriangleCanMerge)
+            {
                             int randTriangleIndexInCurrentTriangles =
                                 currentTriangles.IndexOf(availableTriangles[randIndex]);
                             int triangleBeLookedIndexInCurrentTriangles =
                                 currentTriangles.IndexOf(availableTriangles[i]);
                             CreateQuadId(triangleBeLookedIndexInCurrentTriangles, randTriangleIndexInCurrentTriangles,
-                                communEdge);
+                                checkIfTwoTriangleCanMerge.communEdge);
                             var lastQuadID = finalQuadsId[finalQuadsId.Count - 1];
+                            
                             Quad finalQuad = new Quad(points[lastQuadID.A],
                                 points[lastQuadID.B],
                                 points[lastQuadID.C],
@@ -139,8 +132,6 @@ public class OrganicGridTriangleMerger : MonoBehaviour
                             findQuad = true;
                             break;
                         }
-                    }
-                }
             }
             if (!findQuad)
             {
@@ -194,12 +185,32 @@ public class OrganicGridTriangleMerger : MonoBehaviour
         
     }
 
-    private static int GetTriangleOppositeVertexIndex(Triangle2DPosition _triangle, Segment communEdge)
+    private  int GetTriangleOppositeVertexIndex(Triangle2DPosition _triangle, Segment communEdge)
     {
         Vector2 triangleBeLookedOppositeVertex = _triangle.GetTheOppositeVertexToTheEdge(communEdge);
         int triangleBeLookedOppositeVertexIndex =
             Array.IndexOf(_triangle.Vertices, triangleBeLookedOppositeVertex);
         return triangleBeLookedOppositeVertexIndex;
+    }
+
+    private (bool twoTriangleCanMerge, Segment communEdge) CheckIfTwoTriangleCanMerge(List<Triangle2DPosition> _availableTriangles, int _randIndex, int _i)
+    {
+        List<Vector2> sharedVertices = _availableTriangles[_i].GetSharedVertices(_availableTriangles[_randIndex]);
+        if (sharedVertices.Count == 2)
+        {
+            var communEdge = new Segment(sharedVertices[0], sharedVertices[1]);
+            var candidateQuad = _availableTriangles[_i]
+                .CreateQuadWithTwoTriangle(_availableTriangles[_randIndex], communEdge);
+            if (GeometryHelper.CheckIfPolygonIsConvex(candidateQuad.Vertices))
+            {
+                if (GeometryHelper.CheckIfPolygonConvexHasAllItsAnglesClamped(candidateQuad.Vertices,
+                    minAngleForQuad, maxAngleForQuad))
+                {
+                    return (true,communEdge);
+                }
+            }
+        }
+        return (false, new Segment());
     }
 
     private void OnDrawGizmosSelected()
