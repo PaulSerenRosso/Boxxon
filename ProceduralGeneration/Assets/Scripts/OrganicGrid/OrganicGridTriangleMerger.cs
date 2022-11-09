@@ -142,6 +142,15 @@ public class OrganicGridTriangleMerger : MonoBehaviour
                  availableTriangles.RemoveAt(randIndex);
             }
         }
+
+        for (int i = 0; i < availableTriangles.Count; i++)
+        {
+            int triangleIndexInCurrentTriangles =
+                currentTriangles.IndexOf(availableTriangles[i]);
+            finalTriangles.Add( availableTriangles[i]);
+            finalTrianglesID.Add(currentTrianglesID[triangleIndexInCurrentTriangles]);
+        }
+        
     }
 
     private void CreateQuadId(int _i, int _randIndex, Segment _communEdge)

@@ -22,8 +22,7 @@ namespace OrganicGrid
             organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
                 startGridTransform == null ? Vector3.zero : startGridTransform.position);
             gridBounds = new Bounds(
-                organicGridCoordinates.GridRect.center.ConvertTo3dSpace(CoordinateType.X, CoordinateType.Z,
-                    Vector2.zero),
+                Vector3.zero, 
                 new Vector3(organicGridCoordinates.GridRect.size.x, 2, organicGridCoordinates.GridRect.size.y));
             CreateBaseGridObjectPrefab();
             organicGridPointGeneration.LaunchOrganicGridPointGeneration(organicGridCoordinates);
@@ -40,8 +39,7 @@ namespace OrganicGrid
         private void CreateBaseGridObjectPrefab()
         {
             GameObject gridObject = Instantiate(baseGridObjectPrefab,
-                organicGridCoordinates.StartPosition + new Vector3(organicGridCoordinates.GridRect.size.x / 2, -1,
-                    organicGridCoordinates.GridRect.size.y / 2), quaternion.identity, transform);
+                organicGridCoordinates.StartPosition +new Vector3(0,-1,0), quaternion.identity, transform);
             gridObject.transform.SetGlobalScale(
                 new Coordinate[]
                 {

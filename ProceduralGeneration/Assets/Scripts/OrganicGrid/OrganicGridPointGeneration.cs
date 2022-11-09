@@ -23,8 +23,7 @@ namespace OrganicGrid
             pointObjectsPosition =
                 ConvertPointsTo3DPoints( _organicGridCoordinates);
             pointObjectGenerator.LaunchPointObjectGenerator(_pointObjectPrefab, pointObjectsPosition, 
-                new Vector3(_organicGridCoordinates.GridRect.size.x/2, 0,
-                    _organicGridCoordinates.GridRect.size.y/2)+_organicGridCoordinates.StartPosition);
+                _organicGridCoordinates.StartPosition);
         }
 
         private Vector3[] ConvertPointsTo3DPoints(

@@ -556,8 +556,20 @@ namespace GeometryHelpers
             {
                 quads[i] = new Quad(center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
             }
-
             quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
+            return quads;
+        }
+        
+        public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices, Vector2 _center)
+        {
+            List<Vector2> midEdgePoints = GetMidEdgePoints(_vertices);
+            Quad[] quads = new Quad[4];
+            for (int i = 1; i < midEdgePoints.Count; i++)
+            {
+                quads[i] = new Quad(_center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
+            }
+
+            quads[0] = new Quad(_center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
             return quads;
         }
 
@@ -573,7 +585,6 @@ namespace GeometryHelpers
                     break;
                 }
             }
-
             return oppositeVertex;
         }
     }
