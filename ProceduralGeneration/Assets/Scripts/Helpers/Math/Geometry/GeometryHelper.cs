@@ -315,7 +315,7 @@ namespace GeometryHelpers
                 return true;
             }
 
-        
+
             return false;
         }
 
@@ -337,8 +337,6 @@ namespace GeometryHelpers
 
             return sharedVertices;
         }
-        
-     
 
 
         public static float ConvertDirectionToSignedAngle(Vector2 _firstPoint, Vector2 _secondPoint)
@@ -385,22 +383,24 @@ namespace GeometryHelpers
             Triangle2DPosition[] triangles = new[] { triangle2DPositionA, triangle2DPositionB };
             //check pour 
             List<Vector2> unsharedPoints = new List<Vector2>();
-           
-                for (int j = 0; j < triangles.Length; j++)
+
+            for (int j = 0; j < triangles.Length; j++)
+            {
+                for (int k = 0; k < triangles[j].Vertices.Length; k++)
                 {
-                    for (int k = 0; k < triangles[j].Vertices.Length; k++)
+                    if (triangles[j].Vertices[k] != _communEdge.Points[0] &&
+                        triangles[j].Vertices[k] != _communEdge.Points[1])
                     {
-                        if (triangles[j].Vertices[k] != _communEdge.Points[0] && triangles[j].Vertices[k] != _communEdge.Points[1])
-                        {
-                            unsharedPoints.Add(triangles[j].Vertices[k]);
-                        }
+                        unsharedPoints.Add(triangles[j].Vertices[k]);
                     }
                 }
-                if (unsharedPoints.Count != 2)
+            }
+
+            if (unsharedPoints.Count != 2)
                 throw new Exception("Triangles have not one same edge or the current segment is not the good one");
-            return new Quad(_communEdge.Points[0],  unsharedPoints[0],_communEdge.Points[1], unsharedPoints[1]);
+            return new Quad(_communEdge.Points[0], unsharedPoints[0], _communEdge.Points[1], unsharedPoints[1]);
         }
-        
+
         public static bool IsCounterClockwise(Vector2 _a, Vector2 _b, Vector2 _c)
         {
             var value = (_b.x - _a.x) * (_c.y - _a.y) - (_c.x - _a.x) * (_b.y - _a.y);
@@ -413,74 +413,98 @@ namespace GeometryHelpers
             {
                 throw new Exception("a b and c are colinears");
             }
+
+            return false;
+        }
+        
+        public static bool IsCounterClockwise(this Triangle2DPosition triangle)
+        {
+            Vector2[] vertices = triangle.Vertices;
+            Vector2 a = vertices[0];
+            Vector2 b = vertices[1];
+            Vector2 c = vertices[2];
+            var value = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+            if (value > 0)
+            {
+                return true;
+            }
+            if (value == 0)
+            {
+                throw new Exception("a b and c are colinears");
+            }
+
             return false;
         }
 
         public static bool CheckIfPolygonIsConvex(Vector2[] _vertices)
         {
-            if(_vertices.Length < 4)
+            if (_vertices.Length < 4)
             {
                 throw new Exception("polygon must have more than 3 vertices");
             }
 
             bool isZNegative = false;
-       
-            Vector3 firstCrossProduct = Vector3.Cross(_vertices[_vertices.Length-1]-_vertices[0], _vertices[0]-_vertices[1]);
-       
-          
+
+            Vector3 firstCrossProduct =
+                Vector3.Cross(_vertices[_vertices.Length - 1] - _vertices[0], _vertices[0] - _vertices[1]);
+
+
             if (firstCrossProduct.z < 0)
             {
                 isZNegative = true;
             }
-          
-        
-            Vector3 lastCrossProduct = Vector3.Cross( _vertices[_vertices.Length - 1]-_vertices[0] ,
-                _vertices[_vertices.Length-1]-_vertices[_vertices.Length-2]);
-            
-            if ((lastCrossProduct.z > 0 && isZNegative )|| ( lastCrossProduct.z < 0 && !isZNegative))
+
+
+            Vector3 lastCrossProduct = Vector3.Cross(_vertices[_vertices.Length - 1] - _vertices[0],
+                _vertices[_vertices.Length - 1] - _vertices[_vertices.Length - 2]);
+
+            if ((lastCrossProduct.z > 0 && isZNegative) || (lastCrossProduct.z < 0 && !isZNegative))
             {
                 return false;
             }
-       
-            for (int i = 1; i < _vertices.Length-1; i++)
+
+            for (int i = 1; i < _vertices.Length - 1; i++)
             {
-                Vector3 currentCrossProduct = Vector3.Cross(_vertices[i]-_vertices[i-1] ,
-                    _vertices[i+1]-_vertices[i]);
-                if ((currentCrossProduct.z > 0 && isZNegative )||(currentCrossProduct.z < 0 && !isZNegative))
+                Vector3 currentCrossProduct = Vector3.Cross(_vertices[i] - _vertices[i - 1],
+                    _vertices[i + 1] - _vertices[i]);
+                if ((currentCrossProduct.z > 0 && isZNegative) || (currentCrossProduct.z < 0 && !isZNegative))
                 {
                     return false;
                 }
             }
-            
-            
-          
+
+
             return true;
         }
 
-        public static bool CheckIfPolygonConvexHasAllItsAnglesClamped(Vector2[] _vertices, float _minAngle, float _maxAngle)
-        { 
+        public static bool CheckIfPolygonConvexHasAllItsAnglesClamped(Vector2[] _vertices, float _minAngle,
+            float _maxAngle)
+        {
             List<Vector2[]> directionsForAngle = new List<Vector2[]>();
-            
-            directionsForAngle.Add(new []{_vertices[_vertices.Length-1]-_vertices[0],  _vertices[1]-_vertices[0]});
-            directionsForAngle.Add(new []{_vertices[0]-_vertices[_vertices.Length-1],  _vertices[_vertices.Length-2]-_vertices[_vertices.Length-1]});
-            for (int i = 1; i < _vertices.Length-1; i++)
+
+            directionsForAngle.Add(
+                new[] { _vertices[_vertices.Length - 1] - _vertices[0], _vertices[1] - _vertices[0] });
+            directionsForAngle.Add(new[]
             {
-               directionsForAngle.Add(new []{_vertices[i-1]-_vertices[i], _vertices[i+1]-_vertices[i]});
-            }
-            for (int i = 0; i <  directionsForAngle.Count; i++)
+                _vertices[0] - _vertices[_vertices.Length - 1],
+                _vertices[_vertices.Length - 2] - _vertices[_vertices.Length - 1]
+            });
+            for (int i = 1; i < _vertices.Length - 1; i++)
             {
-                if(!Vector2.Angle(directionsForAngle[i][0], directionsForAngle[i][1]).IsClamp(_minAngle, _maxAngle))
-               {
-                   return false; 
-               }
+                directionsForAngle.Add(new[] { _vertices[i - 1] - _vertices[i], _vertices[i + 1] - _vertices[i] });
             }
+
+            for (int i = 0; i < directionsForAngle.Count; i++)
+            {
+                if (!Vector2.Angle(directionsForAngle[i][0], directionsForAngle[i][1]).IsClamp(_minAngle, _maxAngle))
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
-
-
-
-        
 
         public static bool TrianglesHaveOneSameEdge(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB)
@@ -556,10 +580,11 @@ namespace GeometryHelpers
             {
                 quads[i] = new Quad(center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
             }
+
             quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
             return quads;
         }
-        
+
         public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices, Vector2 _center)
         {
             List<Vector2> midEdgePoints = GetMidEdgePoints(_vertices);
@@ -585,7 +610,70 @@ namespace GeometryHelpers
                     break;
                 }
             }
+
             return oppositeVertex;
+        }
+
+
+        public static Segment[] GetDiagonalsOfQuad(this Quad _quad)
+        {
+            List<float> distanceBetweenSqrtDistance = new List<float>();
+            List<Segment> segmentsInQuad = new List<Segment>();
+
+            for (int i = 0; i < _quad.Vertices.Length; i++)
+            {
+                for (int j = 0; j < _quad.Vertices.Length; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    var candidateSegment = new Segment(_quad.Vertices[i], _quad.Vertices[j]);
+                    bool isValided = true;
+
+                    for (int k = 0; k < segmentsInQuad.Count; k++)
+                    {
+                        if (segmentsInQuad[k].GetSharedVertices(candidateSegment) == 2)
+                        {
+                            isValided = false;
+                            break;
+                        }
+                    }
+                    if (isValided)
+                    {
+                        segmentsInQuad.Add(candidateSegment);
+                        distanceBetweenSqrtDistance.Add((_quad.Vertices[i] - _quad.Vertices[j]).sqrMagnitude);
+                    }
+                }
+            }
+            List<Segment> segmentsSortedInQuad = new List<Segment>();
+            List<float> distanceBetweenSqrtDistanceSorted = new List<float>();
+            for (int i = 0; i < distanceBetweenSqrtDistance.Count; i++)
+            {
+                for (int j = 0; j < distanceBetweenSqrtDistanceSorted.Count ; j++)
+                {
+                    if (distanceBetweenSqrtDistance[i] > distanceBetweenSqrtDistanceSorted[j])
+                    {
+                        if (j == distanceBetweenSqrtDistanceSorted.Count - 1)
+                        {
+                            distanceBetweenSqrtDistanceSorted.Add(distanceBetweenSqrtDistance[i]);
+                            segmentsSortedInQuad.Add(segmentsSortedInQuad[i]);
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        distanceBetweenSqrtDistanceSorted.Insert(j+1,distanceBetweenSqrtDistance[i]);
+                        segmentsSortedInQuad.Insert(j+1,segmentsSortedInQuad[i]);
+                    }
+                }
+            }
+            return new Segment[]
+            {
+                segmentsSortedInQuad[segmentsSortedInQuad.Count - 1],
+                segmentsSortedInQuad[segmentsSortedInQuad.Count - 2]
+            };
         }
     }
 }

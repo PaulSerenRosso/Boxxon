@@ -1,0 +1,16 @@
+{
+    "name": "MergerTrianglesInQuads",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4ba1ce3fecaf2d94f9a03255d8b18ec5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

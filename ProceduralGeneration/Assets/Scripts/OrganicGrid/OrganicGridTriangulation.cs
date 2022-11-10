@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using GeometryHelpers;
 using JetBrains.Annotations;
 using MeshGenerator;
@@ -12,7 +13,7 @@ namespace OrganicGrid
     {
         [SerializeField] private float superTriangleBaseEdgeOffset = 5;
         [SerializeField] private ObjectTriangulation objectTriangulation;
-        private BowyerWatsonWithTriangleID bowyerWatson;
+        private BowyerWatson bowyerWatson;
         private OrganicGridCoordinates organicGridCoordinates;
         [SerializeField] private float maxAngleForTriangle;
         private Triangle2DPosition[] finalTriangles;
@@ -22,10 +23,10 @@ namespace OrganicGrid
             Vector3[] _3Dpoints, Bounds _gridBounds)
         {
             organicGridCoordinates = _organicGridCoordinates;
-            bowyerWatson = new BowyerWatsonWithTriangleID(_organicGridCoordinates.GridRect, superTriangleBaseEdgeOffset,
+            bowyerWatson = new BowyerWatson(_organicGridCoordinates.GridRect, superTriangleBaseEdgeOffset,
                 _points, maxAngleForTriangle);
             finalTriangles = bowyerWatson.Triangulate();
-            finalTrianglesId = bowyerWatson.GetTriangleID();
+            finalTrianglesId = MeshGeneratorHelper.GetTrianglesID(finalTriangles, _points);
             objectTriangulation.LaunchObjectTriangulation(finalTrianglesId, _3Dpoints,_gridBounds,organicGridCoordinates.StartPosition
          );
         }
