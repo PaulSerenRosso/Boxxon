@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using Unity.Mathematics;
 using UnityEngine;
 using AlgebraHelpers;
 using FlexMatrixHelper;
+using UnityEngine.Rendering;
 
 namespace GeometryHelpers
 {
@@ -46,19 +49,21 @@ namespace GeometryHelpers
             return circumCircleRadius;
         }
 
-        public static Vector2 GetCircumcircleCenter(this Triangle2DPosition triangle2DPosition)
+
+        public static Vector2 GetLinesIntersection(Segment _firstSegment, Segment _secondSegment)
         {
-            List<LinearEquation> linearEquationOfMediators = new List<LinearEquation>();
+            List<LinearEquation> linearEquations = new List<LinearEquation>();
+            linearEquations.Add(_firstSegment.GetLinearEquationOfLine());
+            linearEquations.Add(_secondSegment.GetLinearEquationOfLine());
             int xIsKnew = -1;
             int yIsKnew = -1;
-            for (int i = 0; i < triangle2DPosition.Vertices.Length - 1; i++)
+            for (int i = 0; i < linearEquations.Count; i++)
             {
-                linearEquationOfMediators.Add(triangle2DPosition.GetLinearEquationOfMediator(i, i + 1));
-                if (linearEquationOfMediators[i].hasX)
+                if (linearEquations[i].hasX)
                 {
                     xIsKnew = i;
                 }
-                else if (linearEquationOfMediators[i].hasY)
+                else if (linearEquations[i].hasY)
                 {
                     yIsKnew = i;
                 }
@@ -66,25 +71,25 @@ namespace GeometryHelpers
 
             if (xIsKnew == -1 && yIsKnew == -1)
             {
-                for (int i = 0; i < linearEquationOfMediators.Count; i++)
+                for (int i = 0; i < linearEquations.Count; i++)
                 {
-                    LinearEquation mediator = linearEquationOfMediators[i];
+                    LinearEquation mediator = linearEquations[i];
                     mediator.b *= -1;
-                    linearEquationOfMediators[i] = mediator;
+                    linearEquations[i] = mediator;
                 }
 
                 FlexMatrix directorCoefficientMatrix = new FlexMatrix(new FlexMatrixLine[]
                     {
-                        new FlexMatrixLine(new float[] { linearEquationOfMediators[0].a, -1 }),
-                        new FlexMatrixLine(new float[] { linearEquationOfMediators[1].a, -1 })
+                        new FlexMatrixLine(new float[] {linearEquations[0].a, -1}),
+                        new FlexMatrixLine(new float[] {linearEquations[1].a, -1})
                     }
                 );
                 directorCoefficientMatrix = directorCoefficientMatrix.Inverse();
 
                 FlexMatrix originOrderer = new FlexMatrix(new FlexMatrixLine[]
                     {
-                        new FlexMatrixLine(new float[] { linearEquationOfMediators[0].b }),
-                        new FlexMatrixLine(new float[] { linearEquationOfMediators[1].b })
+                        new FlexMatrixLine(new float[] {linearEquations[0].b}),
+                        new FlexMatrixLine(new float[] {linearEquations[1].b})
                     }
                 );
                 return directorCoefficientMatrix.Multiply(originOrderer);
@@ -92,19 +97,29 @@ namespace GeometryHelpers
 
             if (xIsKnew != -1 && yIsKnew == -1)
             {
-                float xValue = linearEquationOfMediators[xIsKnew].x;
-                linearEquationOfMediators.RemoveAt(xIsKnew);
-                return new Vector2(xValue, linearEquationOfMediators[0].a * xValue + linearEquationOfMediators[0].b);
+                float xValue = linearEquations[xIsKnew].x;
+                linearEquations.RemoveAt(xIsKnew);
+                return new Vector2(xValue, linearEquations[0].a * xValue + linearEquations[0].b);
             }
 
             if (yIsKnew != -1 && xIsKnew == -1)
             {
-                float yValue = linearEquationOfMediators[yIsKnew].y;
-                linearEquationOfMediators.RemoveAt(yIsKnew);
-                return new Vector2((-linearEquationOfMediators[0].b + yValue) / linearEquationOfMediators[0].a, yValue);
+                float yValue = linearEquations[yIsKnew].y;
+                linearEquations.RemoveAt(yIsKnew);
+                return new Vector2((-linearEquations[0].b + yValue) / linearEquations[0].a, yValue);
             }
 
-            return new Vector2(linearEquationOfMediators[xIsKnew].x, linearEquationOfMediators[yIsKnew].y);
+            return new Vector2(linearEquations[xIsKnew].x, linearEquations[yIsKnew].y);
+        }
+
+        public static Vector2 GetCircumcircleCenter(this Triangle2DPosition triangle2DPosition)
+        {
+            Segment[] mediators = new Segment[2];
+            for (int i = 0; i < triangle2DPosition.Vertices.Length - 1; i++)
+            {
+                mediators[i] = triangle2DPosition.GetMediator(i, i + 1);
+            }
+            return GetLinesIntersection(mediators[0], mediators[1]);
         }
 
         public static LinearEquation GetLinearEquationOfLine(this Vector2 _firstPoint, Vector2 _secondPoint)
@@ -138,7 +153,40 @@ namespace GeometryHelpers
             return new LinearEquation(a, b, x, y, hasX, hasY);
         }
 
-        public static LinearEquation GetLinearEquationOfMediator(this Triangle2DPosition _triangle2DPosition,
+        public static LinearEquation GetLinearEquationOfLine(this Segment _segment)
+        {
+            float a = 0;
+            float b = 0;
+            float x = 0;
+            float y = 0;
+            bool hasY = false;
+            bool hasX = false;
+            Vector2 firstPoint = _segment.Points[0];
+            Vector2 secondPoint = _segment.Points[1];
+            if (Math.Abs(secondPoint.x - firstPoint.x) > 0)
+            {
+                a = (secondPoint.y - firstPoint.y) / (secondPoint.x - firstPoint.x);
+
+                if (a > 0 || a < 0)
+                {
+                    b = -(a * firstPoint.x - firstPoint.y);
+                }
+                else
+                {
+                    y = firstPoint.y;
+                    hasY = true;
+                }
+            }
+            else
+            {
+                x = firstPoint.x;
+                hasX = true;
+            }
+
+            return new LinearEquation(a, b, x, y, hasX, hasY);
+        }
+
+        public static Segment GetMediator(this Triangle2DPosition _triangle2DPosition,
             int _firstvertexIndex,
             int _secondVertexIndex)
         {
@@ -146,7 +194,7 @@ namespace GeometryHelpers
                                     _triangle2DPosition.Vertices[_firstvertexIndex];
             Vector2 midEdgePoint = _triangle2DPosition.Vertices[_firstvertexIndex] + (edgeDirection / 2);
             Vector2 secondPoint = midEdgePoint + new Vector2(-edgeDirection.y, edgeDirection.x);
-            return midEdgePoint.GetLinearEquationOfLine(secondPoint);
+            return new Segment(midEdgePoint, secondPoint);
         }
 
 
@@ -377,10 +425,10 @@ namespace GeometryHelpers
             throw new Exception("Triangles don't have one same vertex");
         }
 
-        public static Quad CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA,
+        public static Quad2DPosition CreateQuadWithTwoTriangle(this Triangle2DPosition triangle2DPositionA,
             Triangle2DPosition triangle2DPositionB, Segment _communEdge)
         {
-            Triangle2DPosition[] triangles = new[] { triangle2DPositionA, triangle2DPositionB };
+            Triangle2DPosition[] triangles = new[] {triangle2DPositionA, triangle2DPositionB};
             //check pour 
             List<Vector2> unsharedPoints = new List<Vector2>();
 
@@ -398,7 +446,8 @@ namespace GeometryHelpers
 
             if (unsharedPoints.Count != 2)
                 throw new Exception("Triangles have not one same edge or the current segment is not the good one");
-            return new Quad(_communEdge.Points[0], unsharedPoints[0], _communEdge.Points[1], unsharedPoints[1]);
+            return new Quad2DPosition(_communEdge.Points[0], unsharedPoints[0], _communEdge.Points[1],
+                unsharedPoints[1]);
         }
 
         public static bool IsCounterClockwise(Vector2 _a, Vector2 _b, Vector2 _c)
@@ -416,7 +465,7 @@ namespace GeometryHelpers
 
             return false;
         }
-        
+
         public static bool IsCounterClockwise(this Triangle2DPosition triangle)
         {
             Vector2[] vertices = triangle.Vertices;
@@ -428,6 +477,7 @@ namespace GeometryHelpers
             {
                 return true;
             }
+
             if (value == 0)
             {
                 throw new Exception("a b and c are colinears");
@@ -483,7 +533,7 @@ namespace GeometryHelpers
             List<Vector2[]> directionsForAngle = new List<Vector2[]>();
 
             directionsForAngle.Add(
-                new[] { _vertices[_vertices.Length - 1] - _vertices[0], _vertices[1] - _vertices[0] });
+                new[] {_vertices[_vertices.Length - 1] - _vertices[0], _vertices[1] - _vertices[0]});
             directionsForAngle.Add(new[]
             {
                 _vertices[0] - _vertices[_vertices.Length - 1],
@@ -491,7 +541,7 @@ namespace GeometryHelpers
             });
             for (int i = 1; i < _vertices.Length - 1; i++)
             {
-                directionsForAngle.Add(new[] { _vertices[i - 1] - _vertices[i], _vertices[i + 1] - _vertices[i] });
+                directionsForAngle.Add(new[] {_vertices[i - 1] - _vertices[i], _vertices[i + 1] - _vertices[i]});
             }
 
             for (int i = 0; i < directionsForAngle.Count; i++)
@@ -562,40 +612,13 @@ namespace GeometryHelpers
         public static List<Vector2> GetMidEdgePoints(this Vector2[] _vertices)
         {
             List<Vector2> midEdgePoints = new List<Vector2>();
-            midEdgePoints.Add((_vertices[0] + _vertices[3]) / 2);
+            midEdgePoints.Add(_vertices[_vertices.Length - 1] + ((_vertices[0] - _vertices[_vertices.Length - 1]) / 2));
             for (int i = 0; i < _vertices.Length - 1; i++)
             {
-                midEdgePoints.Add((_vertices[i] + _vertices[i + 1]) / 2);
+                midEdgePoints.Add(_vertices[i + 1] + ((_vertices[i] - _vertices[i + 1]) / 2));
             }
 
             return midEdgePoints;
-        }
-
-        public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices)
-        {
-            Vector2 center = GetPolygonCenter(_vertices);
-            List<Vector2> midEdgePoints = GetMidEdgePoints(_vertices);
-            Quad[] quads = new Quad[4];
-            for (int i = 1; i < midEdgePoints.Count; i++)
-            {
-                quads[i] = new Quad(center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
-            }
-
-            quads[0] = new Quad(center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
-            return quads;
-        }
-
-        public static Quad[] SubdividePolygonInQuads(this Vector2[] _vertices, Vector2 _center)
-        {
-            List<Vector2> midEdgePoints = GetMidEdgePoints(_vertices);
-            Quad[] quads = new Quad[4];
-            for (int i = 1; i < midEdgePoints.Count; i++)
-            {
-                quads[i] = new Quad(_center, midEdgePoints[i - 1], midEdgePoints[i], _vertices[i]);
-            }
-
-            quads[0] = new Quad(_center, midEdgePoints[3], midEdgePoints[0], _vertices[0]);
-            return quads;
         }
 
         public static Vector2 GetTheOppositeVertexToTheEdge(this Triangle2DPosition _triangle, Segment _edge)
@@ -613,67 +636,7 @@ namespace GeometryHelpers
 
             return oppositeVertex;
         }
-
-
-        public static Segment[] GetDiagonalsOfQuad(this Quad _quad)
-        {
-            List<float> distanceBetweenSqrtDistance = new List<float>();
-            List<Segment> segmentsInQuad = new List<Segment>();
-
-            for (int i = 0; i < _quad.Vertices.Length; i++)
-            {
-                for (int j = 0; j < _quad.Vertices.Length; j++)
-                {
-                    if (i == j)
-                    {
-                        continue;
-                    }
-
-                    var candidateSegment = new Segment(_quad.Vertices[i], _quad.Vertices[j]);
-                    bool isValided = true;
-
-                    for (int k = 0; k < segmentsInQuad.Count; k++)
-                    {
-                        if (segmentsInQuad[k].GetSharedVertices(candidateSegment) == 2)
-                        {
-                            isValided = false;
-                            break;
-                        }
-                    }
-                    if (isValided)
-                    {
-                        segmentsInQuad.Add(candidateSegment);
-                        distanceBetweenSqrtDistance.Add((_quad.Vertices[i] - _quad.Vertices[j]).sqrMagnitude);
-                    }
-                }
-            }
-            List<Segment> segmentsSortedInQuad = new List<Segment>();
-            List<float> distanceBetweenSqrtDistanceSorted = new List<float>();
-            for (int i = 0; i < distanceBetweenSqrtDistance.Count; i++)
-            {
-                for (int j = 0; j < distanceBetweenSqrtDistanceSorted.Count ; j++)
-                {
-                    if (distanceBetweenSqrtDistance[i] > distanceBetweenSqrtDistanceSorted[j])
-                    {
-                        if (j == distanceBetweenSqrtDistanceSorted.Count - 1)
-                        {
-                            distanceBetweenSqrtDistanceSorted.Add(distanceBetweenSqrtDistance[i]);
-                            segmentsSortedInQuad.Add(segmentsSortedInQuad[i]);
-                        }
-                        continue;
-                    }
-                    else
-                    {
-                        distanceBetweenSqrtDistanceSorted.Insert(j+1,distanceBetweenSqrtDistance[i]);
-                        segmentsSortedInQuad.Insert(j+1,segmentsSortedInQuad[i]);
-                    }
-                }
-            }
-            return new Segment[]
-            {
-                segmentsSortedInQuad[segmentsSortedInQuad.Count - 1],
-                segmentsSortedInQuad[segmentsSortedInQuad.Count - 2]
-            };
-        }
+        
     }
+    
 }

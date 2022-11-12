@@ -1,5 +1,5 @@
 {
-    "name": "MergerTrianglesInQuads",
+    "name": "Subdivider",
     "rootNamespace": "",
     "references": [
         "GUID:4ba1ce3fecaf2d94f9a03255d8b18ec5",

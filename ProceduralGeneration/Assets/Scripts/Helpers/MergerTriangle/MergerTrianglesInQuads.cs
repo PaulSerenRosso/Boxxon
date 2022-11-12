@@ -12,7 +12,7 @@ public class MergerTrianglesInQuads
     private Triangle2DPosition[] inputTriangles;
     private Vector2[] points;
     private List<Triangle2DPosition> finalTriangles = new List<Triangle2DPosition>();
-    private List<Quad> finalQuads = new List<Quad>();
+    private List<Quad2DPosition> finalQuads = new List<Quad2DPosition>();
     private float maxTriangleToMergeCountInPercentage;
     private float minAngleForQuad;
     private float maxAngleForQuad;
@@ -28,7 +28,7 @@ public class MergerTrianglesInQuads
         maxTriangleToMergeCount = (int)(maxTriangleToMergeCountInPercentage / 100 * inputTriangles.Length);
     }
 
-    public void MergeTrianglesInQuads()
+    public (Triangle2DPosition[] finalTriangles, Quad2DPosition[] finalQuads) MergeTrianglesInQuads()
     {
       
         List<Triangle2DPosition> availableTriangles =  new List<Triangle2DPosition>(inputTriangles);
@@ -69,27 +69,29 @@ public class MergerTrianglesInQuads
         {
             finalTriangles.Add( availableTriangles[i]);
         }
+
+        return (finalTriangles.ToArray(),finalQuads.ToArray()); 
     }
     
-    private (bool twoTriangleCanMerge,Quad candidateQuad) CheckIfTwoTriangleCanMerge(List<Triangle2DPosition> _availableTriangles, int _randIndex, int _i)
+    private (bool twoTriangleCanMerge,Quad2DPosition candidateQuad) CheckIfTwoTriangleCanMerge(List<Triangle2DPosition> _availableTriangles, int _randIndex, int _i)
     {
         List<Vector2> sharedVertices = _availableTriangles[_i].GetSharedVertices(_availableTriangles[_randIndex]);
-        Quad candidateQuad;
+        Quad2DPosition candidateQuad2DPosition;
         if (sharedVertices.Count == 2)
         {
             var communEdge = new Segment(sharedVertices[0], sharedVertices[1]);
-            candidateQuad = _availableTriangles[_i]
+            candidateQuad2DPosition = _availableTriangles[_i]
                 .CreateQuadWithTwoTriangle(_availableTriangles[_randIndex], communEdge);
-            if (GeometryHelper.CheckIfPolygonIsConvex(candidateQuad.Vertices))
+            if (GeometryHelper.CheckIfPolygonIsConvex(candidateQuad2DPosition.Vertices))
             {
-                if (GeometryHelper.CheckIfPolygonConvexHasAllItsAnglesClamped(candidateQuad.Vertices,
+                if (GeometryHelper.CheckIfPolygonConvexHasAllItsAnglesClamped(candidateQuad2DPosition.Vertices,
                         minAngleForQuad, maxAngleForQuad))
                 {
-                    return (true,candidateQuad);
+                    return (true,candidateQuad2DPosition);
                 }
             }
         }
-        return (false, candidateQuad);
+        return (false, candidateQuad2DPosition);
     }
 }
 }

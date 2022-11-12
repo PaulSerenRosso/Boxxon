@@ -153,54 +153,25 @@ namespace MeshGenerator
             return trianglesId;
         }
 
-        public static QuadID[] GetQuadsID(Quad[] _quads, Vector2[] _points)
+
+        public static QuadID[] GetQuadsID(Quad2DPosition[] _quads, Vector2[] _points)
         {
             QuadID[] finalQuadIds = new QuadID[_quads.Length];
 
             for (int i = 0; i < _quads.Length; i++)
             {
-                Quad currentQuad = _quads[i];
-                Segment[] diagonalsOfQuad = currentQuad.GetDiagonalsOfQuad();
-                Segment firstDiagonal = diagonalsOfQuad[0];
-                Vector2[] currentQuadVertices = currentQuad.Vertices;
-                int firstDiagonalFirstPointIndexInQuadVertices =
-                    Array.IndexOf(currentQuadVertices, firstDiagonal.Points[0]);
-                int firstDiagonalSecondPointIndexInQuadVertices =
-                    Array.IndexOf(currentQuadVertices, firstDiagonal.Points[1]);
-                List<TriangleID> trianglesIdForQuadId = new List<TriangleID>();
-                List<int> verticesIndexForQuadID = new List<int>();
-                for (int j = 0; j < currentQuadVertices.Length; j++)
+                Quad2DPosition currentQuad2DPosition = _quads[i];
+
+                if (!GeometryHelper.IsCounterClockwise(currentQuad2DPosition.Vertices[0],
+                    currentQuad2DPosition.Vertices[1], currentQuad2DPosition.Vertices[3]))
                 {
-                    if (j != firstDiagonalFirstPointIndexInQuadVertices &&
-                        j != firstDiagonalSecondPointIndexInQuadVertices)
-                    {
-                        int[] verticesIndexInPointsForTriangleId = new int[3];
-                        Triangle2DPosition triangleForQuadId = new Triangle2DPosition(
-                            currentQuadVertices[firstDiagonalFirstPointIndexInQuadVertices], currentQuadVertices[j],
-                            currentQuadVertices[firstDiagonalSecondPointIndexInQuadVertices]);
-                        if (!triangleForQuadId.IsCounterClockwise())
-                        {
-                            triangleForQuadId = new Triangle2DPosition(
-                                currentQuadVertices[j], currentQuadVertices[firstDiagonalFirstPointIndexInQuadVertices],
-                                currentQuadVertices[firstDiagonalSecondPointIndexInQuadVertices]);
-                        }
-
-                        for (int k = 0; k < 3; k++)
-                        {
-                            int indexOfVertex = Array.IndexOf(_points, triangleForQuadId.Vertices[k]);
-                            verticesIndexInPointsForTriangleId[k] = indexOfVertex;
-                            if (!verticesIndexForQuadID.Contains(verticesIndexInPointsForTriangleId[k]))
-                            {
-                                verticesIndexForQuadID.Add(indexOfVertex);
-                            }
-                        }
-
-                        trianglesIdForQuadId.Add(new TriangleID(verticesIndexInPointsForTriangleId));
-                    }
+                    (currentQuad2DPosition.Vertices[0], currentQuad2DPosition.Vertices[2]) =
+                        (currentQuad2DPosition.Vertices[2], currentQuad2DPosition.Vertices[0]);
                 }
-
-                finalQuadIds[i] = new QuadID(trianglesIdForQuadId[0], trianglesIdForQuadId[1],
-                    new int4(verticesIndexForQuadID[0],verticesIndexForQuadID[1],verticesIndexForQuadID[2],verticesIndexForQuadID[3]));
+                finalQuadIds[i] = new QuadID(new int4(Array.IndexOf(_points, currentQuad2DPosition.Vertices[0]),
+                    Array.IndexOf(_points, currentQuad2DPosition.Vertices[1]),
+                    Array.IndexOf(_points, currentQuad2DPosition.Vertices[2]),
+                    Array.IndexOf(_points, currentQuad2DPosition.Vertices[3])));
             }
 
             return finalQuadIds;

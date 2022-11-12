@@ -12,7 +12,7 @@ namespace OrganicGrid
     public class OrganicGridTriangulation : MonoBehaviour
     {
         [SerializeField] private float superTriangleBaseEdgeOffset = 5;
-        [SerializeField] private ObjectTriangulation objectTriangulation;
+        [SerializeField] private TriangulationObjectFactory objectTriangulation;
         private BowyerWatson bowyerWatson;
         private OrganicGridCoordinates organicGridCoordinates;
         [SerializeField] private float maxAngleForTriangle;
@@ -26,8 +26,7 @@ namespace OrganicGrid
             bowyerWatson = new BowyerWatson(_organicGridCoordinates.GridRect, superTriangleBaseEdgeOffset,
                 _points, maxAngleForTriangle);
             finalTriangles = bowyerWatson.Triangulate();
-            finalTrianglesId = MeshGeneratorHelper.GetTrianglesID(finalTriangles, _points);
-            objectTriangulation.LaunchObjectTriangulation(finalTrianglesId, _3Dpoints,_gridBounds,organicGridCoordinates.StartPosition
+            objectTriangulation.CreateObjectTriangulation(finalTriangles,_points, _3Dpoints,_gridBounds,organicGridCoordinates.StartPosition
          );
         }
 

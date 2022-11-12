@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+namespace OrganicGrid
+{
 public class OrganicGridCoordinates
 {
     public Rect GridRect;
@@ -14,3 +15,6 @@ public class OrganicGridCoordinates
         StartPosition = _startPosition;
     }
 }
+
+}
+

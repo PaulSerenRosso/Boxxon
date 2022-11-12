@@ -8,7 +8,7 @@ namespace OrganicGrid
         [SerializeField] private float minDistanceBetweenPoint = 1;
         [SerializeField] private float maxDistanceBetweenPoint = 2;
 
-        [SerializeField] private PointObjectGenerator pointObjectGenerator;
+        [SerializeField] private PointGeneratorObjectFactory pointObjectGenerator;
 
         [SerializeField] private GameObject _pointObjectPrefab;
         private Vector2[] points;
@@ -22,7 +22,7 @@ namespace OrganicGrid
             points = pointGenerator.GeneratePoints();
             pointObjectsPosition =
                 ConvertPointsTo3DPoints( _organicGridCoordinates);
-            pointObjectGenerator.LaunchPointObjectGenerator(_pointObjectPrefab, pointObjectsPosition, 
+            pointObjectGenerator.CreatePointGeneratorObject(_pointObjectPrefab, pointObjectsPosition, 
                 _organicGridCoordinates.StartPosition);
         }
 

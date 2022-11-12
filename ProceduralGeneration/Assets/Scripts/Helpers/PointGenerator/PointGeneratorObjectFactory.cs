@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PointGenerator
 {
-public class PointObjectGenerator : MonoBehaviour
+public class PointGeneratorObjectFactory : MonoBehaviour
 {
    private GameObject[] pointObjects;
    private GameObject pointObjectPrefab;
@@ -18,7 +18,7 @@ public class PointObjectGenerator : MonoBehaviour
           throw new Exception("PointsObjects is null, launch Generator before");
        return pointObjects;
     }
-   public void LaunchPointObjectGenerator(GameObject _pointObjectPrefab, Vector3[] _pointObjectsPosition, Vector3 _offset)
+   public void CreatePointGeneratorObject(GameObject _pointObjectPrefab, Vector3[] _pointObjectsPosition, Vector3 _offset)
    {
       if (_pointObjectPrefab == null)
          throw new Exception("Prefab is not assigned");

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using GeometryHelpers;
 using MeshGenerator;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -60,8 +61,9 @@ namespace MeshGenerator
         {
             Vertex vertexA = new Vertex();
             QuadID quadID = quadsId[i];
-            var quadIDVertices = quadID.Vertices;
-            var pointA = points[quadIDVertices.x];
+
+            var quadIDVerticesIndex = quadID.VerticesIndex;
+            var pointA = points[quadIDVerticesIndex.x];
             vertexA.Position = pointA;
             vertexA.TexCoord0 = new float2(0, 1);
             vertexA.Normal = new float3(0, 1, 0);
@@ -69,7 +71,7 @@ namespace MeshGenerator
             _trianglesAndVertices.SetVertex(indexA, vertexA);
 
             Vertex vertexB = new Vertex();
-            var pointB = points[quadIDVertices.y];
+            var pointB =  points[quadIDVerticesIndex.y];
             vertexB.Position = pointB;
             vertexB.TexCoord0 = new float2(1, 1);
             vertexB.Normal = new float3(0, 1, 0);
@@ -77,7 +79,7 @@ namespace MeshGenerator
             _trianglesAndVertices.SetVertex(indexB, vertexB);
 
             Vertex vertexC = new Vertex();
-            var pointC = points[quadIDVertices.z];
+            var pointC =  points[quadIDVerticesIndex.z];
             vertexC.Position = pointC;
             vertexC.TexCoord0 = new float2(1, 0);
             vertexC.Normal = new float3(0, 1, 0);
@@ -85,17 +87,17 @@ namespace MeshGenerator
             _trianglesAndVertices.SetVertex(indexC, vertexC);
 
             Vertex vertexD = new Vertex();
-            var pointD = points[quadIDVertices.w];
+            var pointD =  points[quadIDVerticesIndex.w];
             vertexD.Position = pointD;
             vertexD.TexCoord0 = new float2(0, 0);
             vertexD.Normal = new float3(0, 1, 0);
             var indexD = i * 4 + 3;
             _trianglesAndVertices.SetVertex(indexD, vertexD);
-
+            
             _trianglesAndVertices.SetTriangle(i * 2,
-                new int3(quadID.FirstTriangle.A, quadID.FirstTriangle.B, quadID.FirstTriangle.C));
+                new int3(indexA, indexB, indexD));
             _trianglesAndVertices.SetTriangle(i * 2 + 1,
-                new int3(quadID.SecondTriangle.A, quadID.SecondTriangle.B, quadID.SecondTriangle.C));
+                new int3(indexC, indexD, indexB));
         }
     }
 }

@@ -5,19 +5,16 @@ using GeometryHelpers;
 using MeshGenerator;
 using Unity.Mathematics;
 using UnityEngine;
-
+[Serializable]
 
 public struct QuadID
 {
-    public TriangleID FirstTriangle;
-    public TriangleID SecondTriangle;
-    public int4 Vertices;
+   
+    public int4 VerticesIndex;
 
-    public QuadID(TriangleID _firstTriangle, TriangleID _secondTriangle, int4 _vertices)
+    public QuadID( int4 verticesIndex)
     {
-        FirstTriangle = _firstTriangle;
-        SecondTriangle = _secondTriangle;
-        Vertices = _vertices;
+        VerticesIndex = verticesIndex;
     }
 
 }

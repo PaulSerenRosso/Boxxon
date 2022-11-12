@@ -14,6 +14,31 @@ namespace GeometryHelpers
         }
 
         public Vector2[] Points;
-        
+        public static bool operator == (Segment a, Segment b)
+        {
+            int sharedVertices = 0;
+            for (int i = 0; i < a.Points.Length; i++)
+            {
+                for (int j = 0; j < b.Points.Length; j++)
+                {
+                    if (a.Points[i] == b.Points[j])
+                    {
+                        sharedVertices++;
+                    }
+                }
+            }
+
+            if (sharedVertices == 2)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool operator !=(Segment a, Segment b)
+        {
+            return !(a == b);
+        }
     }
 }

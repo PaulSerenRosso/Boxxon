@@ -10,6 +10,7 @@ namespace OrganicGrid
         [SerializeField] private OrganicGridPointGeneration organicGridPointGeneration;
         [SerializeField] private OrganicGridTriangulation organicGridTriangulation;
         [SerializeField] private OrganicGridTriangleMerger organicGridTriangleMerger;
+        [SerializeField] private OrganicGridSubdivider organicGridSubdivider;
         [SerializeField] private GameObject baseGridObjectPrefab;
         [SerializeField] private Transform startGridTransform;
 
@@ -22,7 +23,7 @@ namespace OrganicGrid
             organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
                 startGridTransform == null ? Vector3.zero : startGridTransform.position);
             gridBounds = new Bounds(
-                Vector3.zero, 
+                Vector3.zero,
                 new Vector3(organicGridCoordinates.GridRect.size.x, 2, organicGridCoordinates.GridRect.size.y));
             CreateBaseGridObjectPrefab();
             organicGridPointGeneration.LaunchOrganicGridPointGeneration(organicGridCoordinates);
@@ -31,15 +32,19 @@ namespace OrganicGrid
             organicGridTriangulation.LaunchOrganicGridTriangulation(organicGridCoordinates, points,
                 points3D, gridBounds);
             organicGridTriangleMerger.LaunchOrganicGridTriangleMerger(
-                organicGridTriangulation.GetFinalTriangles2DPosition().ToList(),
-                organicGridTriangulation.GetFinalTrianglesID(), points3D, points, gridBounds,
+                organicGridTriangulation.GetFinalTriangles2DPosition()
+                , points3D, points, gridBounds,
                 organicGridCoordinates.StartPosition);
+
+            organicGridSubdivider.LaunchOrganicGridSubdivider(organicGridTriangleMerger.GetFinalQuads(),
+                organicGridTriangleMerger.GetFinalTriangles(), points, gridBounds, organicGridCoordinates.StartPosition,
+                organicGridCoordinates);
         }
 
         private void CreateBaseGridObjectPrefab()
         {
             GameObject gridObject = Instantiate(baseGridObjectPrefab,
-                organicGridCoordinates.StartPosition +new Vector3(0,-1,0), quaternion.identity, transform);
+                organicGridCoordinates.StartPosition + new Vector3(0, -1, 0), quaternion.identity, transform);
             gridObject.transform.SetGlobalScale(
                 new Coordinate[]
                 {

@@ -20,7 +20,7 @@ namespace MeshGenerator {
 	public	TriangleID(int[] ids)
 	{
 		if(ids.Length != 3)
-			throw new Exception("Vertices count must be equal to 3");
+			throw new Exception("VerticesIndex count must be equal to 3");
 		A = (ushort) ids[0];
 		B = (ushort) ids[1];
 		C = (ushort) ids[2];
