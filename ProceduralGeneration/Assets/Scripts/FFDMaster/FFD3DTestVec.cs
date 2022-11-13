@@ -4,85 +4,91 @@ using System.Collections.Generic;
 
 namespace FFDHelper
 {
-	public class FFD3D  {
+	public class FFD3DTestVec : MonoBehaviour
+	{
 		// mesh and control points
 		public Mesh mesh;
+		public float offsetPoint;
 		public List<Vector3> meshCoordinates;
+		public List<GameObject> connectors;
 		public List<Vector3> controlPointsVec;
-	
+
 		// max and min point of mesh
 		public Vector3 p0;
 		public Vector3 pN;
-	
+
 		// width, depth height and number of CPS in each
-		public float S,T,U;
+		public float S, T, U;
 		int CPs_s = 2;
 		int CPs_t = 2;
 		int CPs_u = 2;
-		float [] Bs;
-		float [] Bt;
-		float [] Bu;
-	
+		float[] Bs;
+		float[] Bt;
+		float[] Bu;
+
 		// prefabs for building visual representation of control polygon
 		public GameObject CPNode;
-	
-		[Header("Gizmos")] 
-		public Color gizmosColorBounds;
-		
-	
-		void Launch(Mesh _mesh, float _offset)
+
+		[Header("Gizmos")] public Color gizmosColorBounds;
+
+		void Start()
 		{
-			controlPointsVec.Clear();
-			InitMesh(_mesh, _offset);
-			InitVecPos ();
-			ModifyVerts();
+			InitMesh();
+			InitVecPos();
 		}
-	
-		void ModifyVerts () {
-			Vector3 [] verts = new Vector3[mesh.vertexCount]; 
+
+		void Update()
+		{
+			Vector3[] verts = new Vector3[mesh.vertexCount];
 			verts = mesh.vertices;
-			
-			for (int i = 0; i < mesh.vertexCount; i++){
+
+			for (int i = 0; i < mesh.vertexCount; i++)
+			{
 				verts[i] = ReconstructVertex(i);
 			}
-	
+
 			// if the mesh is different move the mesh and update connectors
-			if (mesh.vertices != verts) {
+			if (mesh.vertices != verts)
+			{
 				mesh.vertices = verts;
 			}
 		}
-	
+
 		// Prepare the mesh of the model
-		void InitMesh(Mesh _mesh, float _offset){
-			mesh = _mesh;
-	
+		void InitMesh()
+		{
+			mesh = GetComponent<MeshFilter>().mesh;
+
 			// get width, depth, height for scaling
 			S = mesh.bounds.size.x;
 			T = mesh.bounds.size.y;
 			U = mesh.bounds.size.z;
-	
+
 			float sizeObj = 2;
-			
+
 			// get min and max points of the model (estimation)
-			p0 = - new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,_offset,0);
-			pN = new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,_offset,0);
-	
+			p0 = -new Vector3(S / sizeObj, T / sizeObj, U / sizeObj) + new Vector3(0, offsetPoint, 0);
+			pN = new Vector3(S / sizeObj, T / sizeObj, U / sizeObj) + new Vector3(0, offsetPoint, 0);
+
 			// for every vertex save its s,t,u as a ratio across the lattice space
-			for (int i = 0; i < mesh.vertexCount; i++){
+			for (int i = 0; i < mesh.vertexCount; i++)
+			{
 				float s = ((mesh.vertices[i].x - p0.x) / (pN.x - p0.x));
 				float t = ((mesh.vertices[i].y - p0.y) / (pN.y - p0.y));
 				float u = ((mesh.vertices[i].z - p0.z) / (pN.z - p0.z));
-				meshCoordinates.Add(new Vector3(s,t,u));
+				meshCoordinates.Add(new Vector3(s, t, u));
 			}
 		}
-	
+
 		// Place control points around the object
-		void InitVecPos(){
+		void InitVecPos()
+		{
 			int i = 0;
-			float x,y,z;
+			float x, y, z;
 
 			// place n control points across the object at appropriate intervals
-			for (x = 0.0f; x < 1.0f; x += 1.0f/CPs_s) {
+			for (x = 0.0f; x < 1.0f; x += 1.0f / CPs_s)
+			{
 				for (y = 0.0f; y < 1.0f; y += 1.0f / CPs_t)
 				{
 					for (z = 0.0f; z < 1.0f; z += 1.0f / CPs_u, i++)
@@ -93,44 +99,58 @@ namespace FFDHelper
 				}
 			}
 		}
-	
-	
-	
+
+
+
 		//en.wikipedia.org/wiki/Bernstein_polynomial
 		// for the given index compute the bernstein coefficients
-		void CalculateBernsteinCoefficients(int index){
+		void CalculateBernsteinCoefficients(int index)
+		{
 			float s = meshCoordinates[index].x;
 			float t = meshCoordinates[index].y;
 			float u = meshCoordinates[index].z;
-			
+
 			Bs = new float[2];
 			Bt = new float[2];
 			Bu = new float[2];
 
-			//2X2X2
-			
+			//FFD 2X2X2	
 			Bs[0] = (1.0f - s);
 			Bs[1] = s;
-	
-			Bt[0] =  (1.0f - t);
+
+			Bt[0] = (1.0f - t);
 			Bt[1] = t;
-			
+
 			Bu[0] = (1.0f - u);
 			Bu[1] = u;
 		}
-	
+
 		// sum up the control points position * bernstein coefficients. return the new vertex position.
-		Vector3 ReconstructVertex(int index){
-			CalculateBernsteinCoefficients (index);
-			Vector3 point = new Vector3 (0,0,0);
-			for (int i = 0; i < 2; i++) {
-				for (int j = 0; j < 2; j++) {
-					for (int k = 0; k < 2; k++) {
-						point += controlPointsVec[k+(j*2)+ (i*2*2)] * (Bs[i]*Bt[j]*Bu[k]);
+		Vector3 ReconstructVertex(int index)
+		{
+			CalculateBernsteinCoefficients(index);
+			Vector3 point = new Vector3(0, 0, 0);
+			for (int i = 0; i < 2; i++)
+			{
+				for (int j = 0; j < 2; j++)
+				{
+					for (int k = 0; k < 2; k++)
+					{
+						point += controlPointsVec[k + (j * 2) + (i * 2 * 2)] * (Bs[i] * Bt[j] * Bu[k]);
 					}
 				}
 			}
+
 			return point;
+		}
+
+		void OnDrawGizmos()
+		{
+			if (Application.isPlaying)
+			{
+				Gizmos.color = gizmosColorBounds;
+				Gizmos.DrawWireCube(mesh.bounds.center + transform.position, mesh.bounds.size);
+			}
 		}
 	}
 }
