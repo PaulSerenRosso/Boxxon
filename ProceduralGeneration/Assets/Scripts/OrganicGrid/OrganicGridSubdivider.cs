@@ -17,9 +17,13 @@ public class OrganicGridSubdivider : MonoBehaviour
     private List<Quad2DPosition> finalQuads = new List<Quad2DPosition>();
     [SerializeField]
     private List<Vector2> finalPoints = new List<Vector2>();
+    [SerializeField] 
+    private QuadID[] finalQuadsID;
 
     [SerializeField]
     private SubdividerInQuadsObjectFactory subdividerInQuadsObjectFactory;
+
+    [SerializeField] private Vector3[] finalPoints3D;
 
     Color[] baseColors = new Color[]
     {
@@ -34,6 +38,7 @@ public class OrganicGridSubdivider : MonoBehaviour
         ,Triangle2DPosition[] _triangles,
         Vector2[] _points, Bounds _gridBounds, Vector3 _offset, OrganicGridCoordinates _organicGridCoordinates)
     {
+        
         SetUp(_points);
 
         SubdivideQuads(_quads, _triangles);
@@ -45,7 +50,9 @@ public class OrganicGridSubdivider : MonoBehaviour
             quadIsVisible[i] = false;
         }
         Vector3[] points3D = ConvertPointsTo3DPoints(_organicGridCoordinates);
+        finalPoints3D = points3D;
         subdividerInQuadsObjectFactory.CreateSubdividerInQuadsObject(points3D, _gridBounds, _offset, finalQuads.ToArray(), finalPoints.ToArray());
+        finalQuadsID = subdividerInQuadsObjectFactory.GetFinalQuadID();
     }
     
     private Vector3[] ConvertPointsTo3DPoints(
@@ -104,6 +111,21 @@ public class OrganicGridSubdivider : MonoBehaviour
     {
         finalQuads.Clear();
         finalPoints = new List<Vector2>(_points);
+    }
+    
+    public QuadID[] GetFinalQuadID()
+    {
+        return finalQuadsID;
+    }
+
+    public Quad2DPosition[] GetFinalQuads()
+    {
+        return finalQuads.ToArray();
+    }
+
+    public Vector3[] GetFinalPoints3D()
+    {
+        return finalPoints3D;
     }
 
     private void OnDrawGizmosSelected()

@@ -1,0 +1,20 @@
+{
+    "name": "CityGeneration",
+    "rootNamespace": "",
+    "references": [
+        "GUID:bd4246436942ef44f8a11cb2d3061e89",
+        "GUID:8c6c3090482677d48bd184f5accbccc4",
+        "GUID:4ba1ce3fecaf2d94f9a03255d8b18ec5",
+        "GUID:49a853ba44746d745a3461ddd91c182b",
+        "GUID:d8b63aba1907145bea998dd612889d6b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

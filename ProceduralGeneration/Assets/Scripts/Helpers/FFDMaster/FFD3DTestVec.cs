@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace FFDHelper
 {
@@ -14,7 +15,7 @@ namespace FFDHelper
 		public List<Vector3> controlPointsVec;
 
 		// max and min point of mesh
-		public Vector3 p0;
+		[FormerlySerializedAs("p0")] public Vector3 pointMin;
 		public Vector3 pN;
 
 		// width, depth height and number of CPS in each
@@ -22,9 +23,9 @@ namespace FFDHelper
 		int CPs_s = 2;
 		int CPs_t = 2;
 		int CPs_u = 2;
-		float[] Bs;
-		float[] Bt;
-		float[] Bu;
+		float[] boundBoxPosX;
+		float[] boundsBoxPosY;
+		float[] boundsBoxPosZ;
 
 		// prefabs for building visual representation of control polygon
 		public GameObject CPNode;
@@ -67,15 +68,15 @@ namespace FFDHelper
 			float sizeObj = 2;
 
 			// get min and max points of the model (estimation)
-			p0 = -new Vector3(S / sizeObj, T / sizeObj, U / sizeObj) + new Vector3(0, offsetPoint, 0);
+			pointMin = -new Vector3(S / sizeObj, T / sizeObj, U / sizeObj) + new Vector3(0, offsetPoint, 0);
 			pN = new Vector3(S / sizeObj, T / sizeObj, U / sizeObj) + new Vector3(0, offsetPoint, 0);
 
 			// for every vertex save its s,t,u as a ratio across the lattice space
 			for (int i = 0; i < mesh.vertexCount; i++)
 			{
-				float s = ((mesh.vertices[i].x - p0.x) / (pN.x - p0.x));
-				float t = ((mesh.vertices[i].y - p0.y) / (pN.y - p0.y));
-				float u = ((mesh.vertices[i].z - p0.z) / (pN.z - p0.z));
+				float s = ((mesh.vertices[i].x - pointMin.x) / (pN.x - pointMin.x));
+				float t = ((mesh.vertices[i].y - pointMin.y) / (pN.y - pointMin.y));
+				float u = ((mesh.vertices[i].z - pointMin.z) / (pN.z - pointMin.z));
 				meshCoordinates.Add(new Vector3(s, t, u));
 			}
 		}
@@ -93,7 +94,7 @@ namespace FFDHelper
 				{
 					for (z = 0.0f; z < 1.0f; z += 1.0f / CPs_u, i++)
 					{
-						Vector3 controlPointsRef = p0 + new Vector3(x * S, y * T, z * U) * 2;
+						Vector3 controlPointsRef = pointMin + new Vector3(x * S, y * T, z * U) * 2;
 						controlPointsVec.Add(controlPointsRef);
 					}
 				}
@@ -106,23 +107,23 @@ namespace FFDHelper
 		// for the given index compute the bernstein coefficients
 		void CalculateBernsteinCoefficients(int index)
 		{
-			float s = meshCoordinates[index].x;
-			float t = meshCoordinates[index].y;
-			float u = meshCoordinates[index].z;
+			float meshCoordinatesX = meshCoordinates[index].x;
+			float meshCoordinatesY = meshCoordinates[index].y;
+			float meshCoordinatesZ = meshCoordinates[index].z;
 
-			Bs = new float[2];
-			Bt = new float[2];
-			Bu = new float[2];
+			boundBoxPosX = new float[2];
+			boundsBoxPosY = new float[2];
+			boundsBoxPosZ = new float[2];
 
 			//FFD 2X2X2	
-			Bs[0] = (1.0f - s);
-			Bs[1] = s;
+			boundBoxPosX[0] = (1.0f - meshCoordinatesX);
+			boundBoxPosX[1] = meshCoordinatesX;
 
-			Bt[0] = (1.0f - t);
-			Bt[1] = t;
+			boundsBoxPosY[0] = (1.0f - meshCoordinatesY);
+			boundsBoxPosY[1] = meshCoordinatesY;
 
-			Bu[0] = (1.0f - u);
-			Bu[1] = u;
+			boundsBoxPosZ[0] = (1.0f - meshCoordinatesZ);
+			boundsBoxPosZ[1] = meshCoordinatesZ;
 		}
 
 		// sum up the control points position * bernstein coefficients. return the new vertex position.
@@ -136,11 +137,10 @@ namespace FFDHelper
 				{
 					for (int k = 0; k < 2; k++)
 					{
-						point += controlPointsVec[k + (j * 2) + (i * 2 * 2)] * (Bs[i] * Bt[j] * Bu[k]);
+						point += controlPointsVec[k + (j * 2) + (i * 2 * 2)] * (boundBoxPosX[i] * boundsBoxPosY[j] * boundsBoxPosZ[k]);
 					}
 				}
 			}
-
 			return point;
 		}
 

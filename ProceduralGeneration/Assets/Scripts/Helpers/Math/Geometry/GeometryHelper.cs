@@ -608,6 +608,18 @@ namespace GeometryHelpers
             center /= _vertices.Length;
             return center;
         }
+        
+        public static Vector3 GetPolygonCenter(Vector3[] _vertices)
+        {
+            Vector3 center = Vector3.zero;
+            for (int i = 0; i < _vertices.Length; i++)
+            {
+                center += _vertices[i];
+            }
+
+            center /= _vertices.Length;
+            return center;
+        }
 
         public static List<Vector2> GetMidEdgePoints(this Vector2[] _vertices)
         {
@@ -636,7 +648,46 @@ namespace GeometryHelpers
 
             return oppositeVertex;
         }
+
+        public static float GetAreaQuad(Vector2[] _vertices)
+        {
+            if (_vertices.Length != 4)
+            {
+                throw new Exception("Vertices Length must be equal to 4");
+            }
+            float areaQuad = 0;
+            float firstEdgeLength = (_vertices[0] - _vertices[1]).magnitude;
+            float secondEdgeLength = (_vertices[1] - _vertices[2]).magnitude;
+            float thirdEdgeLength = (_vertices[2] - _vertices[3]).magnitude;
+            float fourthEdgeLength = (_vertices[3] - _vertices[0]).magnitude;
+
+            float firstAngle = Vector2.Angle(_vertices[1] - _vertices[0], _vertices[3] - _vertices[0]) * Mathf.Deg2Rad;
+            float secondAngle = Vector2.Angle(_vertices[1] - _vertices[2], _vertices[3] - _vertices[2]) * Mathf.Deg2Rad;;
+
+            areaQuad = (float)(0.5 * firstEdgeLength * fourthEdgeLength * Mathf.Sin(firstAngle)
+                               + 0.5 * secondEdgeLength * thirdEdgeLength * Mathf.Sin(secondAngle));
+            return areaQuad;
+        }
         
+        public static float GetAreaQuad(Vector3[] _vertices)
+        {
+            if (_vertices.Length != 4)
+            {
+                throw new Exception("Vertices Length must be equal to 4");
+            }
+            float areaQuad = 0;
+            float firstEdgeLength = (_vertices[0] - _vertices[1]).magnitude;
+            float secondEdgeLength = (_vertices[1] - _vertices[2]).magnitude;
+            float thirdEdgeLength = (_vertices[2] - _vertices[3]).magnitude;
+            float fourthEdgeLength = (_vertices[3] - _vertices[0]).magnitude;
+
+            float firstAngle = Vector3.Angle(_vertices[1] - _vertices[0], _vertices[3] - _vertices[0]) * Mathf.Deg2Rad;
+            float secondAngle = Vector3.Angle(_vertices[1] - _vertices[2], _vertices[3] - _vertices[2])* Mathf.Deg2Rad;
+
+            areaQuad = (float)(0.5 * firstEdgeLength * fourthEdgeLength * Mathf.Sin(firstAngle)
+                               + 0.5 * secondEdgeLength * thirdEdgeLength * Mathf.Sin(secondAngle));
+            return areaQuad;
+        }
     }
     
 }

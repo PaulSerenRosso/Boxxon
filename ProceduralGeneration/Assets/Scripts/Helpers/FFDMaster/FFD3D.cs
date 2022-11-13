@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,34 +8,28 @@ namespace FFDHelper
 	public class FFD3D  {
 		// mesh and control points
 		public Mesh mesh;
-		public List<Vector3> meshCoordinates;
-		public List<Vector3> controlPointsVec;
+		public List<Vector3> meshCoordinates = new List<Vector3>();
+		public Vector3[] controlPointsVec;
 	
 		// max and min point of mesh
 		public Vector3 p0;
 		public Vector3 pN;
 	
 		// width, depth height and number of CPS in each
-		public float S,T,U;
-		int CPs_s = 2;
-		int CPs_t = 2;
-		int CPs_u = 2;
+		public float meshBoundSizeX,meshBoundSizeY,meshBoundSizeZ;
 		float [] Bs;
 		float [] Bt;
 		float [] Bu;
-	
-		// prefabs for building visual representation of control polygon
-		public GameObject CPNode;
-	
-		[Header("Gizmos")] 
-		public Color gizmosColorBounds;
-		
-	
-		void Launch(Mesh _mesh, float _offset)
+
+		public void Launch(Mesh _mesh, Vector3[] _controlPoints,float _offset)
 		{
-			controlPointsVec.Clear();
+			if (_controlPoints.Length != 8)
+			{
+				throw new Exception("Control point must be equal 8");
+			}
+			controlPointsVec = _controlPoints;
+			meshCoordinates.Clear();
 			InitMesh(_mesh, _offset);
-			InitVecPos ();
 			ModifyVerts();
 		}
 	
@@ -57,45 +52,29 @@ namespace FFDHelper
 			mesh = _mesh;
 	
 			// get width, depth, height for scaling
-			S = mesh.bounds.size.x;
-			T = mesh.bounds.size.y;
-			U = mesh.bounds.size.z;
+			meshBoundSizeX = mesh.bounds.size.x;
+			meshBoundSizeY = mesh.bounds.size.y;
+			meshBoundSizeZ = mesh.bounds.size.z;
 	
 			float sizeObj = 2;
 			
 			// get min and max points of the model (estimation)
-			p0 = - new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,_offset,0);
-			pN = new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,_offset,0);
+			p0 = - new Vector3 (meshBoundSizeX/sizeObj, meshBoundSizeY/sizeObj, meshBoundSizeZ/sizeObj) + new Vector3(0,_offset,0);
+			pN = new Vector3 (meshBoundSizeX/sizeObj, meshBoundSizeY/sizeObj, meshBoundSizeZ/sizeObj) + new Vector3(0,_offset,0);
 	
 			// for every vertex save its s,t,u as a ratio across the lattice space
 			for (int i = 0; i < mesh.vertexCount; i++){
 				float s = ((mesh.vertices[i].x - p0.x) / (pN.x - p0.x));
 				float t = ((mesh.vertices[i].y - p0.y) / (pN.y - p0.y));
 				float u = ((mesh.vertices[i].z - p0.z) / (pN.z - p0.z));
+				//Debug.Log(mesh);
+				//Debug.Log( "Vertices Length " + mesh.vertices.Length);
+				//Debug.Log(i);
+				//Debug.Log("Vertices Count " +mesh.vertexCount);
 				meshCoordinates.Add(new Vector3(s,t,u));
 			}
 		}
-	
-		// Place control points around the object
-		void InitVecPos(){
-			int i = 0;
-			float x,y,z;
-
-			// place n control points across the object at appropriate intervals
-			for (x = 0.0f; x < 1.0f; x += 1.0f/CPs_s) {
-				for (y = 0.0f; y < 1.0f; y += 1.0f / CPs_t)
-				{
-					for (z = 0.0f; z < 1.0f; z += 1.0f / CPs_u, i++)
-					{
-						Vector3 controlPointsRef = p0 + new Vector3(x * S, y * T, z * U) * 2;
-						controlPointsVec.Add(controlPointsRef);
-					}
-				}
-			}
-		}
-	
-	
-	
+		
 		//en.wikipedia.org/wiki/Bernstein_polynomial
 		// for the given index compute the bernstein coefficients
 		void CalculateBernsteinCoefficients(int index){

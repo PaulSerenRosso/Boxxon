@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using GeometryHelpers;
 using Unity.Mathematics;
@@ -16,9 +17,12 @@ namespace OrganicGrid
 
         [SerializeField] private Vector2 gridSize = new Vector2(5, 5);
         [SerializeField] private OrganicGridCoordinates organicGridCoordinates;
+        [SerializeField] private Quad2DPosition[] finalQuads;
+        [SerializeField] private QuadID[] finalQuadsID;
+        [SerializeField] private Vector3[] finalPoints3D;
         private Bounds gridBounds;
 
-        private void Start()
+        private void Awake()
         {
             organicGridCoordinates = new OrganicGridCoordinates(new Rect(Vector2.zero, gridSize),
                 startGridTransform == null ? Vector3.zero : startGridTransform.position);
@@ -39,6 +43,30 @@ namespace OrganicGrid
             organicGridSubdivider.LaunchOrganicGridSubdivider(organicGridTriangleMerger.GetFinalQuads(),
                 organicGridTriangleMerger.GetFinalTriangles(), points, gridBounds, organicGridCoordinates.StartPosition,
                 organicGridCoordinates);
+
+            finalQuads = organicGridSubdivider.GetFinalQuads();
+            finalQuadsID = organicGridSubdivider.GetFinalQuadID();
+            finalPoints3D = organicGridSubdivider.GetFinalPoints3D();
+        }
+
+        public OrganicGridCoordinates GetOrganicGridCoordinates()
+        {
+            return organicGridCoordinates;
+        }
+        
+        public QuadID[] GetFinalQuadID()
+        {
+            return finalQuadsID;
+        }
+        
+        public Quad2DPosition[] GetFinalQuads()
+        {
+            return finalQuads.ToArray();
+        }
+
+        public Vector3[] GetFinalPoints3D()
+        {
+            return finalPoints3D;
         }
 
         private void CreateBaseGridObjectPrefab()
