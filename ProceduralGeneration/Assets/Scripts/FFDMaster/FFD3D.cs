@@ -1,12 +1,12 @@
-using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.ReorderableList;
 
 public class FFD3D : MonoBehaviour {
 	// mesh and control points
 	public Mesh mesh;
+	public bool useControlPoints;
+	public float offsetPoint;
 	public List<Vector3> meshCoordinates;
 	public List<GameObject> connectors;
 	public List<GameObject> controlPointsGO;
@@ -28,10 +28,13 @@ public class FFD3D : MonoBehaviour {
 	// prefabs for building visual representation of control polygon
 	public GameObject CPNode;
 
-	void Start () {
-		InitMesh ();
+	[Header("Gizmos")] 
+	public Color gizmosColorBounds;
+
+	void Start ()
+	{
+		InitMesh();
 		InitVecPos ();
-		//InitConnectors ();
 	}
 
 	void Update () {
@@ -60,13 +63,9 @@ public class FFD3D : MonoBehaviour {
 		float sizeObj = 2;
 		
 		// get min and max points of the model (estimation)
-		p0 = - new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,.75f,0);
-		pN = new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,.75f,0);
+		p0 = - new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,offsetPoint,0);
+		pN = new Vector3 (S/sizeObj, T/sizeObj, U/sizeObj) + new Vector3(0,offsetPoint,0);
 
-		//p0 = -new Vector3(mesh.bounds.min.x, mesh.bounds.min.y, mesh.bounds.min.z);
-		//p0 = new Vector3(mesh.bounds.max.x, mesh.bounds.max.y, mesh.bounds.max.z);
-		
-		
 		// for every vertex save its s,t,u as a ratio across the lattice space
 		for (int i = 0; i < mesh.vertexCount; i++){
 			float s = ((mesh.vertices[i].x - p0.x) / (pN.x - p0.x));
@@ -87,13 +86,18 @@ public class FFD3D : MonoBehaviour {
 			{
 				for (z = 0.0f; z < 1.0f; z += 1.0f / CPs_u, i++)
 				{
-					GameObject Node = Instantiate(CPNode, transform.position, Quaternion.identity) as GameObject;
-					Node.transform.parent = transform;
-					Node.transform.localPosition = (p0 + new Vector3(x*S,y*T,z*U)* 2 ) ; // position is min node + % across the object * scale
-					controlPointsGO.Add(Node);
-					//Vec3
-					//Vector3 controlPointsRef = p0 + new Vector3(x * S, y * T, z * U) * 2;
-					//controlPoints.Add(controlPointsRef);
+					if (!useControlPoints)
+					{
+						Vector3 controlPointsRef = p0 + new Vector3(x * S, y * T, z * U) * 2;
+						controlPointsVec.Add(controlPointsRef);
+					}
+					else
+					{
+						GameObject Node = Instantiate(CPNode, transform.position, Quaternion.identity) as GameObject;
+						Node.transform.parent = transform;
+						Node.transform.localPosition = (p0 + new Vector3(x*S,y*T ,z*U) * 2 ); // position is min node + % across the object * scale
+						controlPointsGO.Add(Node);
+					}
 				}
 			}
 		}
@@ -162,9 +166,7 @@ public class FFD3D : MonoBehaviour {
 	// sum up the control points position * bernstein coefficients. return the new vertex position.
 	Vector3 ReconstructVertex(int index){
 		CalculateBernsteinCoefficients (index);
-
 		Vector3 point = new Vector3 (0,0,0);
-		
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < 2; j++) {
 				for (int k = 0; k < 2; k++) {
@@ -174,12 +176,13 @@ public class FFD3D : MonoBehaviour {
 		}
 		return point;
 	}
-
-	private void OnDrawGizmos()
+	
+	void OnDrawGizmos()
 	{
-		if (Application.isPlaying && enabled)
+		if (Application.isPlaying)
 		{
-			Gizmos.DrawWireCube(mesh.bounds.center + transform.position, new Vector3(mesh.bounds.size.x,mesh.bounds.size.y, mesh.bounds.size.z));
+			Gizmos.color = gizmosColorBounds;
+			Gizmos.DrawWireCube(mesh.bounds.center + transform.position, mesh.bounds.size);
 		}
 	}
 }
